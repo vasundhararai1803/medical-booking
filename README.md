@@ -1,4 +1,4 @@
-# Facio Dental & Maxillofacial Super Speciality Centre
+# Facio Dental Super Speciality Centre
 
 A full-stack, premium web application for a modern dental clinic. Features patient booking, telemedicine video consultations, secure medical record uploads, and role-based management dashboards.
 
