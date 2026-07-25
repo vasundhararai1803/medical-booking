@@ -28,7 +28,7 @@ const PRACTO_REVIEWS: Review[] = [
 ];
 
 const VIDEOS = [
-  { id: 1, name: 'Ananya Sharma', treatment: 'Invisalign Journey', thumb: 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800&q=80' },
+  { id: 1, name: 'Ananya Sharma', treatment: 'Invisalign Journey', thumb: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=800&q=80' },
   { id: 2, name: 'Rahul Verma', treatment: 'Full Mouth Rehabilitation', thumb: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=800&q=80' },
   { id: 3, name: 'Priya Das', treatment: 'Painless Root Canal', thumb: 'https://images.unsplash.com/photo-1590611936760-eeb9bc598548?w=800&q=80' }
 ];

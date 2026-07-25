@@ -1,24 +1,40 @@
-
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Calendar, Clock, FileText, User, ChevronRight, MapPin, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, Check, Calendar, Clock, MapPin, Download, CheckCircle, ArrowRight, Activity, Users } from 'lucide-react';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
-// -- Patient View --
+// Mock Data
+const MOCK_NOTIFICATIONS = [
+  { id: 1, title: 'Appointment Confirmed', desc: 'Tomorrow at 10:00 AM.', unread: true, time: '2h' },
+  { id: 2, title: 'New Prescription', desc: 'Dr. Thorne uploaded your prescription.', unread: true, time: '5h' },
+  { id: 3, title: 'Invoice Paid', desc: 'Payment of ₹150 received.', unread: false, time: '1d' },
+];
 
-const PatientDashboardView: React.FC = () => {
-  const { user, isAuthenticated } = useAuth();
+const MOCK_RECORDS = [
+  { id: 1, type: 'X-Ray (Panoramic)', date: 'May 12, 2026' },
+  { id: 2, type: 'Treatment Plan', date: 'April 04, 2026' },
+  { id: 3, type: 'Prescription', date: 'April 04, 2026' },
+];
+
+const MOCK_PAYMENTS = [
+  { id: 1, desc: 'Root Canal Treatment', date: 'May 10', amount: '₹850', status: 'Paid' },
+  { id: 2, desc: 'General Consultation', date: 'June 15', amount: '₹150', status: 'Pending' },
+];
+
+export const PatientDashboardView: React.FC = () => {
+  const { user, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
-  const [refreshKey, setRefreshKey] = useState(0); // Used to trigger refetch
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login?redirect=/patient-dashboard');
+    if (!loading && !isAuthenticated) {
+      navigate('/login?redirect=/dashboard');
       return;
     }
+    if (loading) return;
 
     const fetchAppointments = async () => {
       try {
@@ -29,7 +45,7 @@ const PatientDashboardView: React.FC = () => {
       }
     };
     fetchAppointments();
-  }, [isAuthenticated, navigate, refreshKey]);
+  }, [isAuthenticated, loading, navigate, refreshKey]);
 
   const handleCancel = async (id: string) => {
     if (!window.confirm('Are you sure you want to cancel this appointment?')) return;
@@ -41,204 +57,266 @@ const PatientDashboardView: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch(status) {
-      case 'confirmed': return 'bg-brand-50 text-brand-700';
-      case 'completed': return 'bg-emerald-50 text-emerald-700';
-      case 'cancelled': return 'bg-rose-50 text-rose-700';
-      default: return 'bg-amber-50 text-amber-700'; // pending
-    }
-  };
-
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const displayedAppointments = appointments.filter((appt) => {
+  const upcomingAppointments = appointments.filter((appt) => {
     const apptDate = new Date(appt.appointmentDate);
-    if (activeTab === 'upcoming') {
-      return apptDate >= today && appt.status !== 'cancelled';
-    } else {
-      return apptDate < today || appt.status === 'cancelled';
-    }
-  });
+    return apptDate >= today && appt.status !== 'cancelled' && appt.status !== 'completed';
+  }).sort((a, b) => new Date(a.appointmentDate).getTime() - new Date(b.appointmentDate).getTime());
+
+  const nextAppointment = upcomingAppointments[0];
 
   return (
-    <div className="min-h-screen bg-slate-100 pt-32 pb-12 px-4 sm:px-8 lg:px-12">
-      <div className="max-w-5xl mx-auto bg-white rounded-[2rem] shadow-xl border border-slate-200/60 p-6 sm:p-10 relative overflow-hidden">
+    <div className="min-h-screen bg-[#FDFDFD] pt-32 pb-16 px-4 sm:px-6 lg:px-8 font-sans text-slate-900">
+      <div className="max-w-6xl mx-auto space-y-12">
         
-        {/* Subtle decorative background blur */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-brand-50 rounded-full blur-3xl opacity-60 pointer-events-none" />
-
-        <div className="flex items-center justify-between mb-8 relative z-10">
+        {/* 1. Small Welcome Header */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100"
+        >
           <div>
-            <h1 className="text-3xl font-extrabold text-slate-900">Patient Dashboard</h1>
-            <p className="text-slate-600 mt-1">Welcome back, {user?.name || 'Patient'}!</p>
+            <h1 className="text-3xl font-semibold tracking-tight">Welcome, {user?.name?.split(' ')[0] || 'Patient'}</h1>
+            <p className="text-slate-500 mt-1 text-sm">Here is your health overview.</p>
           </div>
-          <div className="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-bold text-lg">
-            {user?.name?.charAt(0) || 'P'}
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => {
+                const element = document.getElementById('digital-records');
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
+              className="px-5 py-2.5 rounded-lg border border-slate-200 text-sm font-medium hover:bg-slate-50 transition-colors"
+            >
+              View Records
+            </button>
+            <button 
+              onClick={() => navigate('/consult')}
+              className="px-5 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm"
+            >
+              Book Appointment
+            </button>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
-          {/* Left Column: Quick Actions & Profile */}
-          <div className="space-y-6">
-            <div className="bg-slate-50/50 rounded-3xl p-6 border border-slate-100">
-              <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <User className="w-5 h-5 text-brand-500" /> My Profile
-              </h3>
-              <div className="space-y-3 text-sm">
-                <p><span className="text-slate-500">Email:</span> <span className="font-medium text-slate-900">{user?.email || 'patient@example.com'}</span></p>
-                <p><span className="text-slate-500">Phone:</span> <span className="font-medium text-slate-900">{user?.phoneNumber || 'Not provided'}</span></p>
+        {/* 2. Upcoming Appointment Card */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
+          <h2 className="text-lg font-semibold mb-4 tracking-tight">Next Appointment</h2>
+          
+          {nextAppointment ? (
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col md:flex-row justify-between gap-6">
+              <div className="flex gap-6">
+                <div className="w-16 h-16 bg-slate-50 rounded-xl flex flex-col items-center justify-center border border-slate-100 shrink-0">
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{new Date(nextAppointment.appointmentDate).toLocaleDateString('en-US', { month: 'short' })}</span>
+                  <span className="text-2xl font-bold text-slate-800 leading-tight">{new Date(nextAppointment.appointmentDate).getDate()}</span>
+                </div>
+                
+                <div className="flex flex-col justify-center">
+                  <h3 className="text-xl font-semibold text-slate-900">{nextAppointment.treatmentId?.title || 'General Consultation'}</h3>
+                  <p className="text-slate-500 text-sm mt-1">Dr. {nextAppointment.doctorId?.name || 'Specialist'}</p>
+                  
+                  <div className="flex items-center gap-4 mt-3 text-xs font-medium text-slate-500">
+                    <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-slate-400" /> {nextAppointment.timeSlot}</span>
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-slate-400" /> 
+                      {nextAppointment.type === 'video' ? 'Virtual Call' : 'Clinic Location'}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <button className="mt-6 w-full py-2.5 rounded-xl border border-slate-200 text-slate-600 font-medium hover:bg-slate-50 transition-colors text-sm">
-                Edit Profile
+
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => handleCancel(nextAppointment._id)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => alert('To reschedule, please cancel this appointment and book a new one.')}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors"
+                >
+                  Reschedule
+                </button>
+                {nextAppointment.type === 'video' && nextAppointment.videoConsultUrl && (
+                  <a 
+                    href={nextAppointment.videoConsultUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-900 text-white hover:bg-slate-800 transition-colors"
+                  >
+                    Join Video
+                  </a>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="bg-slate-50 rounded-2xl p-8 border border-slate-100 flex items-center justify-between">
+              <div>
+                <p className="text-slate-800 font-medium">No upcoming appointments</p>
+                <p className="text-slate-500 text-sm mt-1">You are all caught up on your visits.</p>
+              </div>
+              <button 
+                onClick={() => navigate('/consult')}
+                className="px-5 py-2.5 rounded-lg bg-white border border-slate-200 text-sm font-medium hover:bg-slate-50 transition-colors shadow-sm text-slate-700"
+              >
+                Book Appointment
               </button>
             </div>
+          )}
+        </motion.div>
 
-            <div className="bg-slate-50/50 rounded-3xl p-6 border border-slate-100">
-              <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-teal-500" /> Digital Records
-              </h3>
-              <ul className="space-y-3">
-                {['Recent X-Ray (May 12)', 'Prescription (Apr 04)', 'Treatment Plan'].map((doc, i) => (
-                  <li key={i} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-brand-50 transition-colors cursor-pointer group">
-                    <span className="text-sm font-medium text-slate-700 group-hover:text-brand-700">{doc}</span>
-                    <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-brand-600" />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Right Column: Appointments */}
-          <div className="lg:col-span-2">
-            <div className="bg-slate-50/50 rounded-3xl p-6 md:p-8 border border-slate-100 min-h-[500px]">
-              
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
-                <div className="flex items-center bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
-                  <button 
-                    onClick={() => setActiveTab('upcoming')}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'upcoming' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                  >
-                    Upcoming
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('past')}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'past' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                  >
-                    Past History
-                  </button>
-                </div>
-                <button 
-                  onClick={() => navigate('/')}
-                  className="bg-brand-50 text-brand-700 px-4 py-2 rounded-full text-sm font-semibold hover:bg-brand-100 transition-colors shrink-0"
-                >
-                  + Book New
-                </button>
-              </div>
-
-              {displayedAppointments.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-64 text-center">
-                  <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                    <Calendar className="w-8 h-8 text-slate-300" />
-                  </div>
-                  <h4 className="text-slate-900 font-medium mb-1">No {activeTab} appointments</h4>
-                  <p className="text-slate-500 text-sm">When you book a consultation, it will appear here.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {displayedAppointments.map((appt) => (
-                    <div key={appt._id} className="flex flex-col sm:flex-row gap-4 p-5 rounded-2xl border border-slate-100 hover:border-brand-200 transition-colors bg-white shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)]">
-                      <div className="sm:w-32 flex flex-col justify-center items-center bg-slate-50 rounded-xl p-3 shrink-0">
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
-                          {new Date(appt.appointmentDate).toLocaleDateString('en-US', { month: 'short' })}
-                        </span>
-                        <span className="text-2xl font-extrabold text-slate-900">
-                          {new Date(appt.appointmentDate).getDate()}
-                        </span>
-                        <span className="text-xs font-medium text-slate-500 mt-1 flex items-center gap-1">
-                          <Clock className="w-3 h-3" /> {appt.timeSlot}
-                        </span>
+        {/* Two-Column Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          
+          {/* Left Column (Main Details) */}
+          <div className="lg:col-span-8 space-y-12">
+            
+            {/* 3. Treatment Journey */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+              <h2 className="text-lg font-semibold mb-6 tracking-tight">Active Treatment Journey</h2>
+              <div className="relative pt-4 pb-2">
+                <div className="absolute top-6 left-6 right-6 h-[2px] bg-slate-100" />
+                <div className="absolute top-6 left-6 w-1/2 h-[2px] bg-blue-500" />
+                
+                <div className="flex justify-between relative z-10">
+                  {['Consultation', 'Diagnosis', 'Treatment', 'Recovery'].map((stage, i) => (
+                    <div key={i} className="flex flex-col items-center gap-3">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center border-[3px] bg-white ${i < 2 ? 'border-blue-500' : i === 2 ? 'border-blue-500' : 'border-slate-200'}`}>
+                        {i < 2 && <div className="w-2 h-2 rounded-full bg-blue-500" />}
                       </div>
-                      
-                      <div className="flex-grow flex flex-col justify-center">
-                        <div className="flex items-start justify-between mb-1">
-                          <h4 className="font-bold text-slate-900 text-lg">{appt.treatmentId?.title || 'General Consultation'}</h4>
-                          <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider ${getStatusColor(appt.status)}`}>
-                            {appt.status}
-                          </span>
-                        </div>
-                        <p className="text-slate-600 text-sm mb-2">with {appt.doctorId?.name || 'Doctor'}</p>
-                        <p className="text-slate-500 text-xs mb-3 flex items-center gap-1">
-                          <MapPin className="w-3 h-3" /> Facio Dental Super Speciality Centre
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <span className="bg-slate-100 text-slate-600 text-[10px] px-2 py-1 rounded-md uppercase font-bold tracking-wider">
-                            {appt.type} Visit
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {activeTab === 'upcoming' && appt.status === 'pending' ? (
-                        <div className="sm:w-24 flex flex-col justify-center gap-2 shrink-0">
-                          {appt.type === 'video' && appt.videoConsultUrl && (
-                            <a 
-                              href={appt.videoConsultUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 text-center transition-colors shadow-sm"
-                            >
-                              Join Video Call
-                            </a>
-                          )}
-                          {appt.medicalReportUrl && (
-                            <a 
-                              href={appt.medicalReportUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="w-full py-2 bg-brand-50 text-brand-600 border border-brand-200 rounded-lg text-xs font-medium hover:bg-brand-100 hover:border-brand-300 text-center transition-colors"
-                            >
-                              View Report
-                            </a>
-                          )}
-                          <button 
-                            onClick={() => handleCancel(appt._id)}
-                            className="w-full py-2 border border-slate-200 text-slate-600 rounded-lg text-xs font-medium hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
-                        (appt.medicalReportUrl || (appt.type === 'video' && appt.videoConsultUrl)) && (
-                          <div className="sm:w-24 flex flex-col justify-center gap-2 shrink-0">
-                            {appt.type === 'video' && appt.videoConsultUrl && (
-                              <a 
-                                href={appt.videoConsultUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 text-center transition-colors shadow-sm"
-                              >
-                                Join Video Call
-                              </a>
-                            )}
-                            {appt.medicalReportUrl && (
-                              <a 
-                                href={appt.medicalReportUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-full py-2 bg-brand-50 text-brand-600 border border-brand-200 rounded-lg text-xs font-medium hover:bg-brand-100 hover:border-brand-300 text-center transition-colors"
-                              >
-                                View Report
-                              </a>
-                            )}
-                          </div>
-                        )
-                      )}
+                      <span className={`text-xs font-medium ${i <= 2 ? 'text-slate-900' : 'text-slate-400'}`}>{stage}</span>
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
+              </div>
+            </motion.div>
+
+            {/* 4. Digital Records */}
+            <motion.div id="digital-records" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold tracking-tight">Digital Records</h2>
+                <button 
+                  onClick={() => alert('Opening full records library...')}
+                  className="text-sm text-slate-500 hover:text-slate-800 transition-colors"
+                >
+                  View All
+                </button>
+              </div>
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.02)] overflow-hidden">
+                {MOCK_RECORDS.map((record, index) => (
+                  <div key={record.id} className={`flex items-center justify-between p-4 ${index !== MOCK_RECORDS.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                    <div className="flex items-center gap-4">
+                      <div>
+                        <p className="text-sm font-medium text-slate-900">{record.type}</p>
+                        <p className="text-xs text-slate-500">{record.date}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm font-medium">
+                      <button onClick={() => alert(`Opening ${record.type} record...`)} className="text-slate-500 hover:text-slate-800 transition-colors">View</button>
+                      <button onClick={() => alert(`Downloading ${record.type} record...`)} className="text-blue-600 hover:text-blue-700 transition-colors">Download</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* 7. Payments */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
+              <h2 className="text-lg font-semibold mb-4 tracking-tight">Payments</h2>
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.02)] overflow-hidden">
+                {MOCK_PAYMENTS.map((payment, index) => (
+                  <div key={payment.id} className={`flex items-center justify-between p-4 ${index !== MOCK_PAYMENTS.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">{payment.desc}</p>
+                      <p className="text-xs text-slate-500">{payment.date}</p>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${payment.status === 'Paid' ? 'bg-slate-100 text-slate-600' : 'bg-amber-50 text-amber-700'}`}>
+                        {payment.status}
+                      </span>
+                      <p className="text-sm font-medium text-slate-900 w-12 text-right">{payment.amount}</p>
+                      <button onClick={() => alert('Downloading invoice...')} className="text-sm text-blue-600 hover:text-blue-700 font-medium">Invoice</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+          </div>
+
+          {/* Right Column (Sidebar) */}
+          <div className="lg:col-span-4 space-y-8">
+            
+            {/* 6. Profile Card */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.02)] p-6">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-600 font-semibold text-lg border border-slate-200">
+                    {user?.name?.charAt(0) || 'P'}
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-slate-900">{user?.name}</h3>
+                    <p className="text-sm text-slate-500">Patient</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4 text-sm">
+                  <div className="flex justify-between border-b border-slate-50 pb-3">
+                    <span className="text-slate-500">Email</span>
+                    <span className="font-medium text-slate-900 truncate max-w-[150px]">{user?.email}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-50 pb-3">
+                    <span className="text-slate-500">Phone</span>
+                    <span className="font-medium text-slate-900">+91 98765 43210</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Emergency</span>
+                    <span className="font-medium text-rose-500">Not Set</span>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => navigate('/profile')}
+                  className="w-full mt-6 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                >
+                  Edit Profile
+                </button>
+              </div>
+            </motion.div>
+
+            {/* 5. Notifications */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.02)] p-6">
+                <h3 className="text-base font-semibold text-slate-900 mb-6">Notifications</h3>
+                <div className="space-y-5">
+                  {MOCK_NOTIFICATIONS.map(note => (
+                    <div key={note.id} className="flex gap-3">
+                      <div className="mt-1.5">
+                        <div className={`w-2 h-2 rounded-full ${note.unread ? 'bg-blue-500' : 'bg-slate-200'}`} />
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between gap-4">
+                          <p className={`text-sm ${note.unread ? 'font-medium text-slate-900' : 'text-slate-600'}`}>{note.title}</p>
+                          <span className="text-[10px] text-slate-400 whitespace-nowrap">{note.time}</span>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">{note.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button 
+                  onClick={() => alert('Opening notifications center...')}
+                  className="w-full mt-6 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                >
+                  View All Notifications
+                </button>
+              </div>
+            </motion.div>
+
           </div>
         </div>
       </div>
@@ -250,16 +328,17 @@ const PatientDashboardView: React.FC = () => {
 // -- Doctor View --
 
 const DoctorDashboardView: React.FC = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState<any[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login?redirect=/doctor-dashboard');
+    if (!loading && !isAuthenticated) {
+      navigate('/login?redirect=/dashboard');
       return;
     }
+    if (loading) return;
 
     if (user?.role !== 'doctor' && user?.role !== 'admin') {
       navigate('/');
@@ -275,7 +354,7 @@ const DoctorDashboardView: React.FC = () => {
       }
     };
     fetchAppointments();
-  }, [isAuthenticated, navigate, user, refreshKey]);
+  }, [isAuthenticated, loading, navigate, user, refreshKey]);
 
   const handleUpdateStatus = async (id: string, status: string) => {
     try {
@@ -491,7 +570,19 @@ const DoctorDashboardView: React.FC = () => {
 
 
 export const Dashboard: React.FC = () => {
-  const { user } = useAuth();
-  if (user?.role === 'doctor') return <DoctorDashboardView />;
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 text-slate-500">
+          <div className="w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
+          <p className="font-medium">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (user?.role === 'doctor' || user?.role === 'admin') return <DoctorDashboardView />;
   return <PatientDashboardView />;
 };

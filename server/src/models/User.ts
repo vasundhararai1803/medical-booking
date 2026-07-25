@@ -22,10 +22,10 @@ const userSchema: Schema<IUser> = new Schema(
       required: true,
       unique: true,
       lowercase: true,
+      trim: true,
     },
     password: {
       type: String,
-      required: true,
       select: false,
     },
     role: {

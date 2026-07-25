@@ -53,13 +53,7 @@ export const protect = async (
       );
     }
 
-    req.user = {
-      _id: (currentUser._id as string).toString(),
-      id: (currentUser._id as string).toString(),
-      email: currentUser.email,
-      role: currentUser.role,
-      name: currentUser.name,
-    };
+    req.user = currentUser;
 
     next();
   } catch (error) {

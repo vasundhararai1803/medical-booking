@@ -11,7 +11,7 @@ const MOCK_TREATMENTS = [
     duration: '45 Mins',
     description: 'Thorough removal of plaque and tartar to prevent cavities and maintain optimal oral health.',
     benefits: ['Removes stubborn plaque', 'Prevents gum disease', 'Freshens breath'],
-    priceRange: '$100 - $150',
+    priceRange: '₹100 - ₹150',
   },
   {
     id: '2',
@@ -20,7 +20,7 @@ const MOCK_TREATMENTS = [
     duration: '30 Mins (Consult)',
     description: 'Virtually invisible aligners customized to gradually and comfortably straighten your teeth.',
     benefits: ['Discreet appearance', 'Removable for eating', 'Comfortable fit'],
-    priceRange: '$3,000 - $5,000',
+    priceRange: '₹3,000 - ₹5,000',
   },
   {
     id: '3',
@@ -29,7 +29,7 @@ const MOCK_TREATMENTS = [
     duration: '60 Mins',
     description: 'Custom-made, tooth-colored shells designed to cover the front surface of teeth to improve your appearance.',
     benefits: ['Fixes chipped teeth', 'Stain-resistant', 'Natural look'],
-    priceRange: '$900 - $2,500',
+    priceRange: '₹900 - ₹2,500',
   },
   {
     id: '4',
@@ -38,7 +38,7 @@ const MOCK_TREATMENTS = [
     duration: '90 Mins',
     description: 'Permanent replacement for missing teeth that look, feel, and function like natural teeth.',
     benefits: ['Permanent solution', 'Preserves bone structure', 'Restores bite'],
-    priceRange: '$1,500 - $4,000',
+    priceRange: '₹1,500 - ₹4,000',
   },
   {
     id: '5',
@@ -47,7 +47,7 @@ const MOCK_TREATMENTS = [
     duration: '60 Mins',
     description: 'Professional grade whitening treatment to safely brighten your smile by several shades.',
     benefits: ['Fast results', 'Safe for enamel', 'Long-lasting'],
-    priceRange: '$300 - $600',
+    priceRange: '₹300 - ₹600',
   },
   {
     id: '6',
@@ -56,7 +56,7 @@ const MOCK_TREATMENTS = [
     duration: '90 Mins',
     description: 'Relieves dental pain and saves your natural tooth by removing infected pulp.',
     benefits: ['Stops severe pain', 'Saves natural tooth', 'Prevents spread of infection'],
-    priceRange: '$800 - $1,500',
+    priceRange: '₹800 - ₹1,500',
   },
 ];
 

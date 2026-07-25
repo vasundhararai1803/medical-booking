@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, User } from 'lucide-react';
+import { Shield, User, ChevronDown, LogOut, Calendar, Settings } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { AnimatePresence } from 'framer-motion';
 
 const NAV_LINKS = [
   { name: 'Home', path: '/' },
@@ -19,6 +20,7 @@ export const Navbar: React.FC = () => {
   const location = useLocation();
   const { scrollY } = useScroll();
   const [hidden, setHidden] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() || 0;
@@ -74,19 +76,65 @@ export const Navbar: React.FC = () => {
           {/* Action Buttons */}
           <div className="flex items-center gap-4">
             {isAuthenticated ? (
-              <div className="flex items-center gap-4">
-                <Link 
-                  to="/dashboard"
-                  className="bg-brand-600 text-white px-4 py-2 rounded-full font-bold text-sm hover:bg-brand-700 transition-colors shadow-md"
+              <div className="relative">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-full font-bold text-sm transition-colors"
                 >
-                  Dashboard
-                </Link>
-                <button 
-                  onClick={logout}
-                  className="bg-slate-100 text-slate-700 px-5 py-2 rounded-full text-sm font-bold hover:bg-slate-200 transition-colors"
-                >
-                  Logout
+                  <div className="w-6 h-6 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center">
+                    <User className="w-4 h-4" />
+                  </div>
+                  <span className="hidden sm:block">{user?.name || 'Account'}</span>
+                  <ChevronDown className="w-4 h-4 text-slate-500" />
                 </button>
+
+                <AnimatePresence>
+                  {isDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 overflow-hidden z-50"
+                    >
+                      <div className="px-4 py-3 border-b border-slate-50">
+                        <p className="text-sm font-bold text-slate-900">{user?.name}</p>
+                        <p className="text-xs font-medium text-slate-500 truncate">{user?.email}</p>
+                      </div>
+                      
+                      <Link
+                        to="/profile"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-brand-600 hover:bg-brand-50 transition-colors"
+                      >
+                        <Settings className="w-4 h-4" />
+                        User Profile
+                      </Link>
+                      
+                      <Link
+                        to="/dashboard"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-brand-600 hover:bg-brand-50 transition-colors"
+                      >
+                        <Calendar className="w-4 h-4" />
+                        Bookings History
+                      </Link>
+
+                      <div className="h-px w-full bg-slate-100 my-1" />
+
+                      <button
+                        onClick={() => {
+                          setIsDropdownOpen(false);
+                          logout();
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors text-left"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Logout
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ) : (
               <Link 

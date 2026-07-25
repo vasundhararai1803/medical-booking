@@ -3,16 +3,16 @@ import { MapPin, Video, CheckCircle2, ChevronRight, ChevronLeft } from 'lucide-r
 
 // --- MOCK DATA ---
 const MOCK_DOCTORS = [
-  { id: '1', name: 'Dr. Sarah Jenkins', specialization: 'General Dentist', fee: '$50', avatar: 'SJ' },
-  { id: '2', name: 'Dr. Michael Chen', specialization: 'Orthodontist', fee: '$80', avatar: 'MC' },
-  { id: '3', name: 'Dr. Emily Carter', specialization: 'Cosmetic Dentist', fee: '$100', avatar: 'EC' },
+  { id: '1', name: 'Dr. Sarah Jenkins', specialization: 'General Dentist', fee: '₹50', avatar: 'SJ' },
+  { id: '2', name: 'Dr. Michael Chen', specialization: 'Orthodontist', fee: '₹80', avatar: 'MC' },
+  { id: '3', name: 'Dr. Emily Carter', specialization: 'Cosmetic Dentist', fee: '₹100', avatar: 'EC' },
 ];
 
 const MOCK_TREATMENTS = [
-  { id: 't1', title: 'Consultation & Checkup', price: '$50' },
-  { id: 't2', title: 'Teeth Cleaning', price: '$100' },
-  { id: 't3', title: 'Root Canal Therapy', price: '$800' },
-  { id: 't4', title: 'Invisalign Assessment', price: '$150' },
+  { id: 't1', title: 'Consultation & Checkup', price: '₹50' },
+  { id: 't2', title: 'Teeth Cleaning', price: '₹100' },
+  { id: 't3', title: 'Root Canal Therapy', price: '₹800' },
+  { id: 't4', title: 'Invisalign Assessment', price: '₹150' },
 ];
 
 const MOCK_SLOTS = [

@@ -1,8 +1,8 @@
 import express from 'express';
-import { registerUser, loginUser, logoutUser, getMe } from '../controllers/authController';
+import { sendOtp, logoutUser, getMe, verifyOtp, requestProfileUpdate, verifyProfileUpdate } from '../controllers/authController';
 import { protect } from '../middlewares/auth';
 import { validateRequest } from '../middlewares/validateRequest';
-import { registerSchema, loginSchema } from '../schemas/authSchema';
+import { sendOtpSchema, verifyOtpSchema } from '../schemas/authSchema';
 
 const router = express.Router();
 
@@ -15,9 +15,9 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/auth/register:
+ * /api/auth/send-otp:
  *   post:
- *     summary: Register a new user
+ *     summary: Send 4-digit OTP for login or registration
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -26,30 +26,21 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             required:
- *               - name
- *               - email
- *               - password
+ *               - identifier
  *             properties:
- *               name:
+ *               identifier:
  *                 type: string
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *               role:
- *                 type: string
- *                 enum: [patient, doctor, admin]
  *     responses:
- *       201:
- *         description: User created successfully
+ *       200:
+ *         description: OTP sent successfully
  */
-router.post('/register', validateRequest(registerSchema), registerUser);
+router.post('/send-otp', validateRequest(sendOtpSchema), sendOtp);
 
 /**
  * @swagger
- * /api/auth/login:
+ * /api/auth/verify-otp:
  *   post:
- *     summary: Login an existing user
+ *     summary: Verify 4-digit OTP
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -58,20 +49,20 @@ router.post('/register', validateRequest(registerSchema), registerUser);
  *           schema:
  *             type: object
  *             required:
- *               - email
- *               - password
+ *               - identifier
+ *               - code
  *             properties:
- *               email:
+ *               identifier:
  *                 type: string
- *               password:
+ *               code:
  *                 type: string
  *     responses:
  *       200:
  *         description: Login successful
  *       401:
- *         description: Invalid credentials
+ *         description: Invalid OTP
  */
-router.post('/login', validateRequest(loginSchema), loginUser);
+router.post('/verify-otp', validateRequest(verifyOtpSchema), verifyOtp);
 
 /**
  * @swagger
@@ -101,5 +92,7 @@ router.post('/logout', logoutUser);
  */
 router.use(protect);
 router.get('/me', getMe);
+router.post('/profile/request-update', requestProfileUpdate);
+router.post('/profile/verify-update', verifyProfileUpdate);
 
 export default router;

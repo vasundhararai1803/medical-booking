@@ -23,7 +23,7 @@ const FEATURED_TREATMENTS: FeaturedTreatment[] = [
     category: 'Orthodontics', 
     description: 'Clear, removable aligners that straighten your teeth discreetly without metal brackets.', 
     icon: Smile, 
-    imageUrl: 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=800',
+    imageUrl: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=800',
     popular: true 
   },
   { 
@@ -54,7 +54,7 @@ const FEATURED_TREATMENTS: FeaturedTreatment[] = [
     category: 'Cosmetic', 
     description: 'Ultra-thin porcelain shells bonded to the front of teeth for a flawless Hollywood smile.', 
     icon: Sparkles,
-    imageUrl: 'https://images.unsplash.com/photo-1522849696084-818b92644246?auto=format&fit=crop&q=80&w=800'
+    imageUrl: 'https://images.unsplash.com/photo-1609840114035-3c981b782dfe?auto=format&fit=crop&q=80&w=800'
   },
   { 
     title: 'Wisdom Tooth Extraction', 
