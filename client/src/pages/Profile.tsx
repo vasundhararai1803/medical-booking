@@ -35,6 +35,7 @@ export const Profile: React.FC = () => {
     }
     
     if (user && !editMode && !verificationMode) {
+      // eslint-disable-next-line
       setFormData({
         name: user.name || '',
         email: user.email || '',
