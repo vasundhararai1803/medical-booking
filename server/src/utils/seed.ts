@@ -122,25 +122,22 @@ const seedDatabase = async () => {
     console.log('Doctor Profile Created');
 
     const rawTreatments = [
-      { title: 'Invisible And Clear Braces', category: 'Orthodontics', isActive: true },
-      { title: 'Invisalign certified orthodontics', category: 'Orthodontics', isActive: true },
-      { title: 'Fixing Dental Gaps', category: 'Orthodontics', isActive: true },
-      { title: 'Post & Core Crown', category: 'Endodontics/Restorative', isActive: true },
-      { title: 'Complete Dentures (CD)', category: 'Prosthodontics', isActive: true },
-      { title: 'Immediate Denture', category: 'Prosthodontics', isActive: true },
-      { title: 'Periodontal (Gums) Treatment', category: 'Periodontics', isActive: true },
-      { title: 'Impacted Tooth Extraction', category: 'Oral Surgery', isActive: true },
-      { title: 'Laminates / Veneers', category: 'Cosmetic', isActive: true },
-      { title: 'Complete, Partial and Flexible Dentures', category: 'Prosthodontics', isActive: true },
-      { title: 'Tooth Whitening Treatment', category: 'Cosmetic', isActive: true },
-      { title: 'Tooth Reshaping', category: 'Cosmetic', isActive: true },
-      { title: 'Oral and Maxillofacial Trauma Surgery', category: 'Oral Surgery', isActive: true },
-      { title: 'Maxillofacial Prosthodontics', category: 'Prosthodontics', isActive: true },
-      { title: 'Smile Makeover', category: 'Cosmetic', isActive: true },
-      { title: 'Bleeding Gums Treatment', category: 'Periodontics', isActive: true },
-      { title: 'Dental Filling', category: 'Restorative', isActive: true },
-      { title: 'Scaling and Polishing', category: 'Preventive', isActive: true },
-      { title: 'Oral Cancer Screening & Care', category: 'Oral Surgery', isActive: true },
+      { title: 'Invisible And Clear Braces', category: 'orthodontics', isActive: true, imageUrl: 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=800' },
+      { title: 'Invisalign Certified Orthodontics', category: 'orthodontics', isActive: true, imageUrl: 'https://images.unsplash.com/photo-1598256989800-fea5c1c84f1a?auto=format&fit=crop&q=80&w=800' },
+      { title: 'Fixing Dental Gaps', category: 'orthodontics', isActive: true, imageUrl: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=800' },
+      { title: 'Root Canal Treatment (RCT)', category: 'general', isActive: true, imageUrl: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=800' },
+      { title: 'Complete Dentures (CD)', category: 'general', isActive: true, imageUrl: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=800' },
+      { title: 'Periodontal (Gums) Treatment', category: 'general', isActive: true, imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800' },
+      { title: 'Laminates / Veneers', category: 'cosmetic', isActive: true, imageUrl: 'https://images.unsplash.com/photo-1522849696084-818b92644246?auto=format&fit=crop&q=80&w=800' },
+      { title: 'Tooth Whitening Treatment', category: 'cosmetic', isActive: true, imageUrl: 'https://images.unsplash.com/photo-1609840114035-3c981b782dfe?auto=format&fit=crop&q=80&w=800' },
+      { title: 'Smile Makeover', category: 'cosmetic', isActive: true, imageUrl: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=800' },
+      { title: 'Single Tooth Implant', category: 'implants', isActive: true, imageUrl: 'https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&q=80&w=800' },
+      { title: 'Full Mouth Implants (All-On-4)', category: 'implants', isActive: true, imageUrl: 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=800' },
+      { title: 'Pit & Fissure Sealants', category: 'pediatric', isActive: true, imageUrl: 'https://images.unsplash.com/photo-1609141076615-562a1abfbd8a?auto=format&fit=crop&q=80&w=800', description: 'Protective coatings for children\'s teeth to prevent cavities.' },
+      { title: 'Fluoride Treatment', category: 'pediatric', isActive: true, imageUrl: 'https://images.unsplash.com/photo-1590620718588-46cb5d43fb32?auto=format&fit=crop&q=80&w=800', description: 'Strengthens child enamel and guards against tooth decay.' },
+      { title: 'Painless Pulpotomy', category: 'pediatric', isActive: true, imageUrl: 'https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?auto=format&fit=crop&q=80&w=800', description: 'Gentle nerve treatment for infected primary (baby) teeth.' },
+      { title: 'Impacted Tooth Extraction', category: 'emergency', isActive: true, imageUrl: 'https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?auto=format&fit=crop&q=80&w=800' },
+      { title: 'Emergency Tooth Pain Relief', category: 'emergency', isActive: true, imageUrl: 'https://images.unsplash.com/photo-1584516150909-c43483ee7932?auto=format&fit=crop&q=80&w=800' }
     ];
     
     const treatments = await Treatment.insertMany(

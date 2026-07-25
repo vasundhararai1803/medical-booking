@@ -10,17 +10,15 @@ export const createAppointment = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { doctorId, treatmentId, appointmentDate, timeSlot, type, notes, paymentMethod, transactionId, paymentStatus } = req.body;
+    const { doctorId, treatmentId, appointmentDate, timeSlot, type, notes, paymentMethod } = req.body;
     const medicalReportUrl = req.file?.path;
 
-    if (!doctorId || !appointmentDate || !timeSlot || !type) {
-      return next(new AppError('Please provide all required fields', 400));
-    }
+    // Normalize date to midnight UTC to ensure index matching is strictly by day
+    const normalizedDate = new Date(appointmentDate);
+    normalizedDate.setUTCHours(0, 0, 0, 0);
 
-    // Check if slot is already taken
-    const startOfDay = new Date(appointmentDate);
-    startOfDay.setUTCHours(0, 0, 0, 0);
-    const endOfDay = new Date(appointmentDate);
+    const startOfDay = new Date(normalizedDate);
+    const endOfDay = new Date(normalizedDate);
     endOfDay.setUTCHours(23, 59, 59, 999);
 
     const existingAppointment = await Appointment.findOne({
@@ -43,21 +41,28 @@ export const createAppointment = async (
       videoConsultUrl = `https://meet.jit.si/FacioDental_Appt_${uniqueId}`;
     }
 
-    const newAppointment = await Appointment.create({
-      patientId: req.user?._id,
-      doctorId,
-      treatmentId,
-      appointmentDate,
-      timeSlot,
-      type,
-      notes,
-      status: 'pending',
-      paymentStatus: paymentStatus || 'pending',
-      paymentMethod,
-      transactionId,
-      medicalReportUrl,
-      videoConsultUrl,
-    });
+    let newAppointment;
+    try {
+      newAppointment = await Appointment.create({
+        patientId: req.user?._id,
+        doctorId,
+        treatmentId,
+        appointmentDate: normalizedDate,
+        timeSlot,
+        type,
+        notes,
+        status: 'pending',
+        paymentStatus: 'pending',
+        paymentMethod,
+        medicalReportUrl,
+        videoConsultUrl,
+      });
+    } catch (err: any) {
+      if (err.code === 11000) {
+        return next(new AppError('This time slot was just booked by another patient. Please select another slot.', 409));
+      }
+      throw err;
+    }
 
     const populatedAppointment = await Appointment.findById(newAppointment._id)
       .populate('patientId', 'name email phoneNumber')

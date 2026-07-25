@@ -10,6 +10,9 @@ import authRoutes from './routes/authRoutes';
 import doctorRoutes from './routes/doctorRoutes';
 import treatmentRoutes from './routes/treatmentRoutes';
 import appointmentRoutes from './routes/appointmentRoutes';
+import paymentRoutes from './routes/paymentRoutes';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger';
 
 dotenv.config();
 
@@ -44,11 +47,15 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'success', message: 'API is running smoothly' });
 });
 
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/treatments', treatmentRoutes);
 app.use('/api/appointments', appointmentRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Unknown Route Handler
 app.use((req: Request, res: Response, next: NextFunction) => {

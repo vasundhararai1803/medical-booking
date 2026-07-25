@@ -11,6 +11,7 @@ export interface ITreatment extends Document {
     min: number;
     max: number;
   };
+  imageUrl?: string;
   isActive: boolean;
 }
 
@@ -43,6 +44,9 @@ const treatmentSchema: Schema<ITreatment> = new Schema(
     costRange: {
       min: { type: Number },
       max: { type: Number },
+    },
+    imageUrl: {
+      type: String,
     },
     isActive: {
       type: Boolean,

@@ -94,13 +94,10 @@ export const QuickBookModal: React.FC<QuickBookModalProps> = ({ treatmentId, onC
     setSubmitting(true);
     setError('');
     try {
-      // Simulate Payment Processing
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
       const docObj = doctors.find((d) => d.userId?._id === selectedDoctor);
       const correctDoctorId = docObj?._id || selectedDoctor;
-      const transactionId = paymentMethod === 'Pay at Clinic' ? undefined : `PAY_MOCK_${Math.floor(Math.random() * 100000)}`;
 
+      // 1. Create Appointment (Securely defaults to 'pending' on the server)
       const formData = new FormData();
       formData.append('doctorId', correctDoctorId);
       if (localTreatmentId && localTreatmentId !== 'others') {
@@ -110,8 +107,6 @@ export const QuickBookModal: React.FC<QuickBookModalProps> = ({ treatmentId, onC
       formData.append('timeSlot', selectedSlot);
       formData.append('type', visitType);
       formData.append('paymentMethod', paymentMethod);
-      if (transactionId) formData.append('transactionId', transactionId);
-      formData.append('paymentStatus', paymentMethod === 'Pay at Clinic' ? 'pending' : 'paid');
       
       const combinedNotes = localTreatmentId === 'others' 
           ? `Custom Condition: ${customCondition}\n\nDeposit paid via ${paymentMethod}` 
@@ -122,9 +117,24 @@ export const QuickBookModal: React.FC<QuickBookModalProps> = ({ treatmentId, onC
         formData.append('medicalReport', medicalReport);
       }
 
-      await api.post('/appointments', formData, {
+      const res = await api.post('/appointments', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
+
+      const appointmentId = res.data.data.appointment._id;
+
+      // 2. Simulate Payment Verification (if paying online)
+      if (paymentMethod !== 'Pay at Clinic') {
+        // Simulate waiting for payment gateway UI (Stripe/Razorpay)
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Securely transition status to 'paid' via server verification endpoint
+        await api.post('/payments/mock-verify', {
+          appointmentId,
+          paymentMethod
+        });
+      }
+
       setSuccess(true);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Booking failed');

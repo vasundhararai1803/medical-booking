@@ -1,11 +1,10 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { Home } from './pages/Home';
-import { PatientDashboard } from './pages/dashboards/PatientDashboard';
-import { DoctorDashboard } from './pages/dashboards/DoctorDashboard';
-import { Login } from './pages/Login';
-import { Register } from './pages/Register';
+import { Dashboard } from './pages/Dashboard';
+import { Auth } from './pages/Auth';
 import { Navbar } from './components/layout/Navbar';
+import { Footer } from './components/layout/Footer';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { Treatments } from './pages/Treatments';
 import { Testimonials } from './pages/Testimonials';
@@ -14,7 +13,7 @@ import { Consult } from './pages/Consult';
 import { Blog } from './pages/Blog';
 import { Profile } from './pages/Profile';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Navigate } from 'react-router-dom';
 
 const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
@@ -44,10 +43,10 @@ const AnimatedRoutes = () => {
         <Route path="/consult" element={<PageWrapper><Consult /></PageWrapper>} />
         <Route path="/blog" element={<PageWrapper><Blog /></PageWrapper>} />
         <Route path="/profile" element={<PageWrapper><Profile /></PageWrapper>} />
-        <Route path="/patient-dashboard" element={<PageWrapper><PatientDashboard /></PageWrapper>} />
-        <Route path="/doctor-dashboard" element={<PageWrapper><DoctorDashboard /></PageWrapper>} />
-        <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />
-        <Route path="/register" element={<PageWrapper><Register /></PageWrapper>} />
+        <Route path="/dashboard" element={<PageWrapper><Dashboard /></PageWrapper>} />
+        <Route path="/login" element={<PageWrapper><Auth /></PageWrapper>} />
+        <Route path="/register" element={<PageWrapper><Auth /></PageWrapper>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>
   );
@@ -63,6 +62,7 @@ function App() {
             <AnimatedRoutes />
           </ErrorBoundary>
         </main>
+        <Footer />
       </AuthProvider>
     </BrowserRouter>
   );

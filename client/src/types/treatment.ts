@@ -18,4 +18,5 @@ export interface Treatment {
     answer: string;
   }[];
   isActive: boolean;
+  imageUrl?: string;
 }

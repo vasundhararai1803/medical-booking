@@ -75,13 +75,12 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center gap-4">
             {isAuthenticated ? (
               <div className="flex items-center gap-4">
-                <button 
-                  onClick={() => navigate('/profile')}
-                  className="text-sm font-semibold text-slate-700 hover:text-brand-600 hidden sm:flex items-center justify-center p-2 rounded-full hover:bg-slate-50 transition-colors"
-                  aria-label="Dashboard"
+                <Link 
+                  to="/dashboard"
+                  className="bg-brand-600 text-white px-4 py-2 rounded-full font-bold text-sm hover:bg-brand-700 transition-colors shadow-md"
                 >
-                  <User className="w-5 h-5" />
-                </button>
+                  Dashboard
+                </Link>
                 <button 
                   onClick={logout}
                   className="bg-slate-100 text-slate-700 px-5 py-2 rounded-full text-sm font-bold hover:bg-slate-200 transition-colors"

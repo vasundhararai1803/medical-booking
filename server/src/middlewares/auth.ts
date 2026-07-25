@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import { User } from '../models/User';
 import { AppError } from '../utils/AppError';
-import { getMockUser } from '../controllers/authController';
+import { env } from '../config/env';
 
 interface JwtPayload {
   id: string;
@@ -20,7 +20,9 @@ export const protect = async (
   try {
     let token: string | undefined;
 
-    if (
+    if (req.cookies && req.cookies.token) {
+      token = req.cookies.token;
+    } else if (
       req.headers.authorization &&
       req.headers.authorization.startsWith('Bearer')
     ) {
@@ -35,26 +37,10 @@ export const protect = async (
 
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || 'fallback_secret'
+      env.JWT_SECRET
     ) as JwtPayload;
 
-    // Offline mock fallback
-    if (mongoose.connection.readyState !== 1) {
-      const mockUser = getMockUser(decoded.id);
-      if (!mockUser) {
-        return next(
-          new AppError('The user belonging to this token no longer exists.', 401)
-        );
-      }
-      req.user = {
-        _id: mockUser.id,
-        id: mockUser.id,
-        email: mockUser.email,
-        role: mockUser.role,
-        name: mockUser.name,
-      };
-      return next();
-    }
+    // Only use MongoDB
 
     const currentUser = await User.findById(decoded.id);
 

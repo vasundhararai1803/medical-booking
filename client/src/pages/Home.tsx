@@ -20,7 +20,7 @@ export const Home: React.FC = () => {
         For now, we render the Hero directly as requested.
       */}
       
-      <Hero />
+      <Hero onBookClick={() => handleBookService()} />
       
       <OurServices onBookTreatment={handleBookService} />
       

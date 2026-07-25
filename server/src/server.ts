@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import app from './app';
+import { env } from './config/env';
 
-const PORT = process.env.PORT || 8080;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/aurasmile';
+const PORT = env.PORT;
+const MONGO_URI = env.MONGO_URI;
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
@@ -19,8 +20,8 @@ mongoose
   })
   .catch((err) => {
     console.error('❌ MongoDB connection error:', err);
-    console.warn('⚠️ Please ensure MongoDB is running locally or provide a valid MONGO_URI in .env');
-    console.warn('⚠️ The server will still boot for mock routing purposes.');
+    console.error('💥 Shutting down due to database connection failure.');
+    process.exit(1);
   });
 
 const server = app.listen(PORT, () => {

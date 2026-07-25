@@ -22,21 +22,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Check auth state on initial application load
   useEffect(() => {
     const initializeAuth = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setIsLoading(false);
-        return;
-      }
-
       try {
-        // Fetch current user details using the token from localStorage
         const res = await api.get('/auth/me');
         setUser(res.data.user);
       } catch {
-        // Token is invalid or expired
+        // No valid session cookie found or token expired
         setUser(null);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
       } finally {
         setIsLoading(false);
       }
@@ -47,27 +38,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     const res = await api.post('/auth/login', { email, password });
-    const { token, user } = res.data;
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-    setUser(user);
+    setUser(res.data.user);
   };
 
   const register = async (name: string, email: string, password: string, role: string) => {
     const res = await api.post('/auth/register', { name, email, password, role });
-    const { token, user } = res.data;
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-    setUser(user);
+    setUser(res.data.user);
   };
 
   const logout = async () => {
     try {
-      // Optional: if there's a backend logout route to invalidate token
-      // await api.post('/auth/logout');
+      await api.post('/auth/logout');
     } finally {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
       setUser(null);
       navigate('/login');
     }

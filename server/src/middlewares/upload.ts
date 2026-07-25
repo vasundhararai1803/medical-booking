@@ -2,6 +2,7 @@ import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import dotenv from 'dotenv';
+import { AppError } from '../utils/AppError';
 
 dotenv.config();
 
@@ -32,6 +33,14 @@ const storage = new CloudinaryStorage({
 export const upload = multer({ 
   storage: storage,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (allowedMimeTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new AppError('Invalid file type. Only JPEG, PNG, WEBP, and PDF files are allowed.', 400));
+    }
   }
 });
