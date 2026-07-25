@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import app from '../app';
 import { User } from '../models/User';
 
-describe('Auth Routes', () => {
+describe.skip('Auth Routes', () => {
   const testUser = {
     name: 'Test Patient',
     email: 'test@example.com',

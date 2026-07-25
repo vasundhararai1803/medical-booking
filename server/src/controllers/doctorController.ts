@@ -126,7 +126,7 @@ export const getAvailableSlots = async (
     const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const dayName = daysOfWeek[queryDate.getDay()];
 
-    const daySchedule = doctor.weeklyAvailability.find((d) => d.dayOfWeek === dayName);
+    const daySchedule = (doctor as any).weeklyAvailability?.find((d: any) => d.dayOfWeek === dayName);
     
     if (!daySchedule) {
       res.status(200).json({
@@ -175,7 +175,7 @@ export const getAvailableSlots = async (
         $lte: endOfDay,
       },
       status: { $ne: 'cancelled' },
-    });
+    } as any);
 
     const bookedSlots = bookedAppointments.map((app) => app.timeSlot);
     const availableSlots = allSlots.filter((slot) => !bookedSlots.includes(slot));

@@ -8,8 +8,8 @@ export const createAppointmentSchema = z.object({
       message: 'Invalid date format',
     }),
     timeSlot: z.string().min(1, 'Time slot is required'),
-    type: z.enum(['in-person', 'video'], {
-      errorMap: () => ({ message: 'Type must be either in-person or video' }),
+    type: z.string().refine((val) => val === 'in-person' || val === 'video', {
+      message: 'Type must be either in-person or video',
     }),
     notes: z.string().optional(),
     paymentMethod: z.string().optional(),

@@ -225,7 +225,7 @@ export const cancelAppointment = async (
     }
 
     // Check ownership or admin rights
-    const isPatient = appointment.patientId.toString() === req.user?._id;
+    const isPatient = appointment.patientId.toString() === (req.user as any)?._id?.toString();
     const isAdmin = req.user?.role === 'admin';
     // For doctor, check if the doctorId belongs to them
     let isDoctorOwner = false;
@@ -341,7 +341,7 @@ export const getBookedSlots = async (
         $lte: endOfDay,
       },
       status: { $ne: 'cancelled' },
-    }).select('timeSlot -_id');
+    } as any).select('timeSlot -_id');
 
     const bookedSlots = bookedAppointments.map((app) => app.timeSlot);
 

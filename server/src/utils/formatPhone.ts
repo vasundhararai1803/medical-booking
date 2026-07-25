@@ -1,6 +1,6 @@
 export const formatPhone = (phone: string): string => {
   // Sanitize spaces, hyphens, parentheses, etc.
-  let sanitized = phone.replace(/[\s\-\(\)]/g, '');
+  let sanitized = phone.replace(/[\s-()]/g, '');
 
   // If the number doesn't start with '+', prepend a country code.
   if (!sanitized.startsWith('+')) {
