@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  loading: boolean;
   sendOtp: (identifier: string, name?: string) => Promise<void>;
   verifyOtp: (identifier: string, code: string) => Promise<void>;
   register: (name: string, email: string, password: string, role: string) => Promise<void>;
@@ -66,6 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         isAuthenticated: !!user,
         isLoading,
+        loading: isLoading,
         sendOtp,
         verifyOtp,
         register,
