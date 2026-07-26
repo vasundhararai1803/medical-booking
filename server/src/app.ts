@@ -22,7 +22,19 @@ const app: Application = express();
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      const allowedClient = process.env.CLIENT_URL || 'http://localhost:5173';
+      
+      // Allow exact match, or any Vercel preview domain to prevent deployment blocking
+      if (origin === allowedClient || origin.endsWith('.vercel.app') || origin === 'http://localhost:5173') {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   })
 );
