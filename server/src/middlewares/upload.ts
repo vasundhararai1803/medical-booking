@@ -22,10 +22,10 @@ const storage = new CloudinaryStorage({
     return {
       folder: 'facio_dental_reports',
       public_id: filename,
-      // If the file is a PDF, we need to explicitly tell Cloudinary it's raw/pdf, 
       // otherwise it tries to process it as an image. Cloudinary handles auto resource_type 
       // decently well but setting it to 'auto' is the safest approach.
       resource_type: 'auto', 
+      type: 'private',
     };
   },
 });

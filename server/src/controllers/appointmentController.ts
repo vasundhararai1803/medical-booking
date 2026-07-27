@@ -76,7 +76,7 @@ export const createAppointment = async (
 
       // Email to Patient
       if (patient?.email) {
-        await sendEmail({
+        sendEmail({
           to: patient.email,
           subject: 'Appointment Request Received - Facio Dental',
           html: `
@@ -93,12 +93,12 @@ export const createAppointment = async (
             </ul>
             <p>We will review your request and confirm it shortly.</p>
           `
-        });
+        }).catch(err => console.error('Error sending patient email:', err));
       }
 
       // Email to Doctor/Admin
       if (doctor?.userId?.email) {
-        await sendEmail({
+        sendEmail({
           to: doctor.userId.email,
           subject: 'New Appointment Request - Facio Dental',
           html: `
@@ -116,7 +116,7 @@ export const createAppointment = async (
             </ul>
             <p>Please log in to the dashboard to confirm or manage this request.</p>
           `
-        });
+        }).catch(err => console.error('Error sending doctor email:', err));
       }
     }
 
@@ -140,7 +140,7 @@ export const getMyPatientAppointments = async (
     const appointments = await Appointment.find({ patientId: req.user?._id })
       .populate({
         path: 'doctorId',
-        select: 'name email',
+        populate: { path: 'userId', select: 'name email' }
       })
       .populate({
         path: 'treatmentId',
@@ -293,7 +293,7 @@ export const updateAppointmentStatus = async (
 
       if (patient?.email) {
         const statusText = status === 'confirmed' ? 'has been Confirmed' : 'was Cancelled';
-        await sendEmail({
+        sendEmail({
           to: patient.email,
           subject: `Appointment ${status === 'confirmed' ? 'Confirmed' : 'Cancelled'} - Facio Dental`,
           html: `
@@ -302,7 +302,7 @@ export const updateAppointmentStatus = async (
             <p>Your appointment with Dr. ${doctor?.userId?.name} for ${treatment ? treatment.title : 'General / Custom'} on ${new Date(appointment.appointmentDate).toDateString()} at ${appointment.timeSlot} ${statusText.toLowerCase()}.</p>
             ${status === 'cancelled' ? '<p>If you have any questions or wish to reschedule, please contact us.</p>' : '<p>We look forward to seeing you!</p>'}
           `
-        });
+        }).catch(err => console.error('Error sending status email:', err));
       }
     }
 

@@ -17,7 +17,7 @@ export const getAllDoctors = async (
       query.specializations = { $in: [specialization as string] };
     }
     if (minRating) {
-      query['rating.average'] = { $gte: Number(minRating) };
+      query.rating = { $gte: Number(minRating) };
     }
     if (languages) {
       const langs = (languages as string).split(',');

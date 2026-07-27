@@ -272,10 +272,32 @@ export const getMe = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  res.status(200).json({
-    success: true,
-    user: req.user,
-  });
+  let token;
+  if (req.cookies && req.cookies.token) {
+    token = req.cookies.token;
+  }
+  
+  if (!token) {
+    res.status(200).json({ success: true, user: null });
+    return;
+  }
+
+  try {
+    const decoded = jwt.verify(token, env.JWT_SECRET) as { id: string };
+    const user = await User.findById(decoded.id);
+    
+    if (!user) {
+      res.status(200).json({ success: true, user: null });
+      return;
+    }
+    
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (err) {
+    res.status(200).json({ success: true, user: null });
+  }
 };
 
 export const logoutUser = (

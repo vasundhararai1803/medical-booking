@@ -62,9 +62,10 @@ const router = Router();
  *       409:
  *         description: Conflict, slot already booked
  */
+router.get('/booked-slots', getBookedSlots);
+
 router.use(protect);
 
-router.get('/booked-slots', getBookedSlots);
 router.get('/all', restrictTo('doctor', 'admin'), getAllSystemAppointments);
 
 router.post('/', restrictTo('patient'), upload.single('medicalReport'), validateRequest(createAppointmentSchema), createAppointment);

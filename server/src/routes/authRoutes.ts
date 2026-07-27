@@ -92,8 +92,9 @@ router.post('/logout', logoutUser);
  *       401:
  *         description: Not authenticated
  */
-router.use(protect);
 router.get('/me', getMe);
+
+router.use(protect);
 router.post('/profile/request-update', requestProfileUpdate);
 router.post('/profile/verify-update', verifyProfileUpdate);
 
