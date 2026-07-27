@@ -79,12 +79,28 @@ export const login = async (
       return next(new AppError('Email/phone and password are required', 400));
     }
 
-    const user = await User.findOne({
+    let user = await User.findOne({
       $or: [{ email: identifier.toLowerCase() }, { phone: identifier }]
     }).select('+password');
 
     if (!user) {
-      return next(new AppError('Invalid credentials', 401));
+      // The issue was that the standard security practice is to return "Invalid credentials"
+      // when an account doesn't exist to prevent hackers from knowing which emails are registered.
+      // Since we want users to be legitimate users immediately, we auto-register them here.
+      const isEmail = identifier.includes('@');
+      
+      if (!isEmail) {
+        return next(new AppError('Account not found. Please use an email to create a new account.', 404));
+      }
+
+      user = await User.create({
+        name: identifier.split('@')[0], // Use email prefix as the default name
+        email: identifier.toLowerCase(),
+        password,
+        role: 'patient',
+      });
+      
+      return sendTokenResponse(user, 201, res);
     }
 
     const isMatch = await user.matchPassword(password);
