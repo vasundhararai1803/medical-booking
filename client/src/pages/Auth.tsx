@@ -1,28 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Shield, AlertCircle, Mail, ArrowRight, CheckCircle, User } from 'lucide-react';
+import { Shield, AlertCircle, Mail, ArrowRight, User, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const Auth: React.FC = () => {
-  const { sendOtp, verifyOtp, isAuthenticated } = useAuth();
+  const { login, register, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
-  const [step, setStep] = useState<1 | 2>(1);
   const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const inputRefs = [
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-  ];
 
   const from = (location.state as any)?.from?.pathname || '/';
 
@@ -32,68 +24,22 @@ export const Auth: React.FC = () => {
     }
   }, [isAuthenticated, navigate, from]);
 
-  const handleSendOtp = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
       if (mode === 'signup') {
-        await sendOtp(identifier, name);
+        await register(name, identifier, password, 'patient');
       } else {
-        await sendOtp(identifier);
+        await login(identifier, password);
       }
-      setStep(2);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to send OTP');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const code = otp.join('');
-    if (code.length !== 4) return;
-
-    setError('');
-    setLoading(true);
-
-    try {
-      await verifyOtp(identifier, code);
       navigate(from, { replace: true });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid verification code');
+      setError(err.response?.data?.message || (mode === 'signup' ? 'Registration failed' : 'Invalid credentials'));
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleOtpChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return;
-
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-
-    // Auto-focus next input
-    if (value && index < 3) {
-      inputRefs[index + 1].current?.focus();
-    }
-
-    // Auto-submit if all 4 digits are filled
-    if (index === 3 && value && newOtp.every(d => d !== '')) {
-      // Trigger submission (we use setTimeout to ensure state updates first)
-      setTimeout(() => {
-        const event = new Event('submit', { cancelable: true, bubbles: true }) as any;
-        handleVerifyOtp(event);
-      }, 0);
-    }
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      inputRefs[index - 1].current?.focus();
     }
   };
 
@@ -122,7 +68,7 @@ export const Auth: React.FC = () => {
           transition={{ delay: 0.1 }}
           className="mt-6 text-center text-3xl font-extrabold text-slate-900 tracking-tight"
         >
-          {step === 1 ? 'Welcome to Facio Dental' : 'Verify Your Identity'}
+          Welcome to Facio Dental
         </motion.h2>
         
         <motion.p 
@@ -131,9 +77,7 @@ export const Auth: React.FC = () => {
           transition={{ delay: 0.2 }}
           className="mt-2 text-center text-sm text-slate-600 font-medium"
         >
-          {step === 1 
-            ? 'Sign in or create an account instantly'
-            : `We sent a 4-digit code to ${identifier}`}
+          Sign in or create an account instantly
         </motion.p>
       </div>
 
@@ -152,129 +96,115 @@ export const Auth: React.FC = () => {
             </div>
           )}
 
-          {step === 1 ? (
-            <>
-              {/* Tabs */}
-              <div className="flex bg-slate-100 p-1 rounded-xl mb-8">
-                <button
-                  type="button"
-                  onClick={() => { setMode('signin'); setError(''); }}
-                  className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
-                    mode === 'signin' 
-                      ? 'bg-white text-slate-900 shadow-sm' 
-                      : 'text-slate-500 hover:text-slate-700'
-                  }`}
-                >
-                  Sign In
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setMode('signup'); setError(''); }}
-                  className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
-                    mode === 'signup' 
-                      ? 'bg-white text-slate-900 shadow-sm' 
-                      : 'text-slate-500 hover:text-slate-700'
-                  }`}
-                >
-                  Sign Up
-                </button>
-              </div>
+          {/* Tabs */}
+          <div className="flex bg-slate-100 p-1 rounded-xl mb-8">
+            <button
+              type="button"
+              onClick={() => { setMode('signin'); setError(''); }}
+              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
+                mode === 'signin' 
+                  ? 'bg-white text-slate-900 shadow-sm' 
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => { setMode('signup'); setError(''); }}
+              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
+                mode === 'signup' 
+                  ? 'bg-white text-slate-900 shadow-sm' 
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Sign Up
+            </button>
+          </div>
 
-              <form className="space-y-6" onSubmit={handleSendOtp}>
-                {mode === 'signup' && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                  >
-                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                      Full Name
-                    </label>
-                    <div className="relative group">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <User className="h-5 w-5 text-slate-400 group-focus-within:text-brand-500 transition-colors" />
-                      </div>
-                      <input
-                        type="text"
-                        required={mode === 'signup'}
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="appearance-none block w-full pl-11 pr-3 py-3.5 border border-slate-200 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 sm:text-base font-medium transition-all"
-                        placeholder="John Doe"
-                      />
-                    </div>
-                  </motion.div>
-                )}
-
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
-                    Email or Phone Number
-                  </label>
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-slate-400 group-focus-within:text-brand-500 transition-colors" />
-                    </div>
-                    <input
-                      type="text"
-                      name="identifier"
-                      autoComplete="username"
-                      required
-                      value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
-                      className="appearance-none block w-full pl-11 pr-3 py-3.5 border border-slate-200 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 sm:text-base font-medium transition-all"
-                      placeholder="Enter your email or phone"
-                    />
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {mode === 'signup' && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+              >
+                <label htmlFor="name" className="block text-sm font-bold text-slate-700 mb-2">
+                  Full Name
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <User className="h-5 w-5 text-slate-400 group-focus-within:text-brand-500 transition-colors" />
                   </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading || !identifier || (mode === 'signup' && !name)}
-                  className="w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent rounded-xl shadow-md shadow-brand-600/20 text-base font-bold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:opacity-50 transition-all transform active:scale-[0.98]"
-                >
-                  {loading ? 'Sending Code...' : (mode === 'signin' ? 'Continue' : 'Create Account')}
-                  {!loading && <ArrowRight className="w-4 h-4" />}
-                </button>
-              </form>
-            </>
-          ) : (
-            <form className="space-y-8" onSubmit={handleVerifyOtp}>
-              <div className="flex justify-center gap-3 sm:gap-4">
-                {otp.map((digit, index) => (
                   <input
-                    key={index}
-                    ref={inputRefs[index]}
+                    id="name"
+                    name="name"
                     type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => handleOtpChange(index, e.target.value)}
-                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                    className="w-14 h-16 sm:w-16 sm:h-18 text-center text-2xl font-extrabold text-slate-900 border-2 border-slate-200 rounded-xl focus:border-brand-500 focus:ring-4 focus:ring-brand-500/20 transition-all outline-none"
+                    required={mode === 'signup'}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="appearance-none block w-full pl-11 pr-3 py-3.5 border border-slate-200 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 sm:text-base font-medium transition-all"
+                    placeholder="John Doe"
+                    autoComplete="name"
                   />
-                ))}
-              </div>
+                </div>
+              </motion.div>
+            )}
 
-              <div className="space-y-4">
-                <button
-                  type="submit"
-                  disabled={loading || otp.some(d => d === '')}
-                  className="w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent rounded-xl shadow-md shadow-brand-600/20 text-base font-bold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:opacity-50 transition-all transform active:scale-[0.98]"
-                >
-                  {loading ? 'Verifying...' : 'Verify & Sign In'}
-                  {!loading && <CheckCircle className="w-4 h-4" />}
-                </button>
-                
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="w-full py-2 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors"
-                >
-                  Use a different email or phone
-                </button>
+            <div>
+              <label htmlFor="identifier" className="block text-sm font-bold text-slate-700 mb-2">
+                Email or Phone Number
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-slate-400 group-focus-within:text-brand-500 transition-colors" />
+                </div>
+                <input
+                  id="identifier"
+                  type="text"
+                  name="identifier"
+                  autoComplete="username"
+                  required
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  className="appearance-none block w-full pl-11 pr-3 py-3.5 border border-slate-200 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 sm:text-base font-medium transition-all"
+                  placeholder="Enter your email or phone"
+                />
               </div>
-            </form>
-          )}
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-bold text-slate-700 mb-2">
+                Password
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-brand-500 transition-colors" />
+                </div>
+                <input
+                  id="password"
+                  type="password"
+                  name="password"
+                  autoComplete={mode === 'signin' ? "current-password" : "new-password"}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="appearance-none block w-full pl-11 pr-3 py-3.5 border border-slate-200 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 sm:text-base font-medium transition-all"
+                  placeholder="Enter your password"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || !identifier || !password || (mode === 'signup' && !name)}
+              className="w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent rounded-xl shadow-md shadow-brand-600/20 text-base font-bold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:opacity-50 transition-all transform active:scale-[0.98]"
+            >
+              {loading ? 'Processing...' : (mode === 'signin' ? 'Sign In' : 'Create Account')}
+              {!loading && <ArrowRight className="w-4 h-4" />}
+            </button>
+          </form>
+
         </div>
       </motion.div>
     </div>

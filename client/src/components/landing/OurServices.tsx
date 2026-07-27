@@ -313,15 +313,15 @@ export const OurServices: React.FC<OurServicesProps> = ({ onBookTreatment }) => 
         )}
 
         {/* EDITORIAL GRID (Product-Style Cards) */}
-        <div>
-          <div className="flex items-center gap-4 mb-10">
-            <h3 className="text-3xl font-black text-slate-900 tracking-tight">
-              {searchQuery ? 'Search Results' : selectedCategory === 'All' ? 'Popular Procedures' : `${CATEGORIES.find(c => c.id === selectedCategory)?.label}`}
-            </h3>
-            <div className="flex-1 h-[1px] bg-slate-200 mt-2 hidden sm:block" />
-          </div>
-          
-          {popularServices.length > 0 ? (
+        {popularServices.length > 0 && (
+          <div>
+            <div className="flex items-center gap-4 mb-10">
+              <h3 className="text-3xl font-black text-slate-900 tracking-tight">
+                {searchQuery ? 'Search Results' : selectedCategory === 'All' ? 'Popular Procedures' : `${CATEGORIES.find(c => c.id === selectedCategory)?.label}`}
+              </h3>
+              <div className="flex-1 h-[1px] bg-slate-200 mt-2 hidden sm:block" />
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
               {popularServices.map((treatment, idx) => (
                 <motion.div
@@ -378,20 +378,8 @@ export const OurServices: React.FC<OurServicesProps> = ({ onBookTreatment }) => 
                 </motion.div>
               ))}
             </div>
-          ) : (
-            <div className="text-center py-32 bg-white rounded-[3rem] border border-slate-100 shadow-sm">
-              <Search className="w-12 h-12 text-slate-300 mx-auto mb-6" />
-              <h4 className="text-2xl font-bold text-slate-900 mb-3">No procedures found</h4>
-              <p className="text-slate-500 text-lg">Try adjusting your search terms or category filters.</p>
-              <button 
-                onClick={() => { setSearchQuery(''); setSelectedCategory('All'); }}
-                className="mt-8 px-6 py-3 bg-brand-50 text-brand-700 font-bold rounded-full hover:bg-brand-100 transition-colors"
-              >
-                Clear Filters
-              </button>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* PREMIUM LAYERED CTA */}
         <motion.div 

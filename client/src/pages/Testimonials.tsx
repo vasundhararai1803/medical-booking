@@ -34,8 +34,8 @@ const VIDEOS = [
 ];
 
 const BEFORE_AFTER = [
-  { id: 1, title: 'Severe Crowding to Perfect Alignment', before: 'https://images.unsplash.com/photo-1609840114035-3c981b782dfe?w=600&q=80', after: 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=600&q=80' },
-  { id: 2, title: 'Porcelain Veneers Makeover', before: 'https://images.unsplash.com/photo-1598256989800-fea5f6c810db?w=600&q=80', after: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=600&q=80' }
+  { id: 1, title: 'Severe Crowding to Perfect Alignment', before: 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=600&q=80', after: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=600&q=80' },
+  { id: 2, title: 'Porcelain Veneers Makeover', before: 'https://images.unsplash.com/photo-1522849696084-818b92644246?w=600&q=80', after: 'https://images.unsplash.com/photo-1590611936760-eeb9bc598548?w=600&q=80' }
 ];
 
 const TIMELINE = [
@@ -89,7 +89,7 @@ export const Testimonials: React.FC = () => {
       <Navbar />
 
       {/* HERO SECTION */}
-      <section className="relative pt-40 pb-20 lg:pt-48 lg:pb-32 overflow-hidden flex items-center justify-center min-h-[90vh]">
+      <section className="relative pt-32 pb-20 lg:pt-36 lg:pb-32 overflow-hidden flex items-center justify-center min-h-[70vh]">
         {/* Abstract Background */}
         <div className="absolute inset-0 z-0 opacity-40">
           <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-200/50 blur-[120px]" />

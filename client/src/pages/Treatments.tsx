@@ -75,7 +75,7 @@ const FEATURED_TREATMENTS: FeaturedTreatment[] = [
     category: 'Pediatric', 
     description: 'Gentle, specialized care ensuring a lifetime of healthy smiles for your little ones.', 
     icon: Baby, 
-    imageUrl: 'https://images.unsplash.com/photo-1609141076615-562a1abfbd8a?auto=format&fit=crop&q=80&w=800',
+    imageUrl: 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=800',
     popular: true 
   },
 ];

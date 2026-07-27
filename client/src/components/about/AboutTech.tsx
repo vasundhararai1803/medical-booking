@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 const TECH_EQUIPMENT = [
   { title: "Digital 3D CBCT", desc: "Crystal clear 3D jaw imaging for precise surgical planning and zero guesswork.", img: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=800" },
-  { title: "Intraoral Scanners", desc: "No more messy molds. We capture your teeth digitally in seconds for a perfect fit.", img: "https://images.unsplash.com/photo-1598256989800-fea5c1c84f1a?auto=format&fit=crop&q=80&w=800" },
+  { title: "Intraoral Scanners", desc: "No more messy molds. We capture your teeth digitally in seconds for a perfect fit.", img: "https://images.unsplash.com/photo-1609840114035-3c981b782dfe?auto=format&fit=crop&q=80&w=800" },
   { title: "Laser Dentistry", desc: "Minimally invasive, virtually painless gum treatments and surgeries with rapid healing.", img: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=800" },
   { title: "Class B Sterilisation", desc: "Hospital-grade, 4-step sterilization protocols ensuring absolute safety and hygiene.", img: "https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?auto=format&fit=crop&q=80&w=800" }
 ];

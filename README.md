@@ -1,6 +1,6 @@
 # Facio Dental & Maxillofacial Super Speciality Centre
 
-> A full-stack MERN appointment management and clinical operational platform built with passwordless 4-digit OTP authentication, atomic schedule locking, and real-time medical record storage.
+> A full-stack MERN appointment management and clinical operational platform built with secure password-based authentication, atomic schedule locking, and real-time medical record storage.
 
 ---
 
@@ -8,14 +8,14 @@
 
 Facio Dental provides patients with a multi-step clinic booking experience while delivering scheduling and record management for healthcare providers. 
 
-The application utilizes passwordless authentication, server-side authorization boundaries, atomic concurrency controls, and Zod input validation to ensure end-to-end security and data integrity.
+The application utilizes secure password authentication, server-side authorization boundaries, atomic concurrency controls, and Zod input validation to ensure end-to-end security and data integrity.
 
 ---
 
 ## Core Features
 
 ### Patient Experience
-* **Passwordless OTP Login:** 4-digit OTP verification via SMS/Email with a persistent 12-hour secure session.
+* **Secure Authentication:** Encrypted password-based login with a persistent 12-hour secure session.
 * **Smart Booking Engine:** Real-time doctor availability checks with automated concurrency locking.
 * **Telehealth Integration:** Virtual video consultations powered by the Jitsi Meet API.
 * **Medical Record Storage:** Diagnostic report and X-ray uploads with strict MIME-type validation.
@@ -30,6 +30,7 @@ The application utilizes passwordless authentication, server-side authorization 
 ## Security & Architecture Highlights
 
 * **12-Hour HttpOnly Cookie Sessions:** Auth tokens stored exclusively in `HttpOnly`, `SameSite`, and `Secure` cookies to defend against XSS exfiltration.
+* **Cryptographic Hashing:** User passwords are encrypted using bcrypt salt and hashing before database storage.
 * **Atomic Double-Booking Protection:** MongoDB Compound Unique Indexes (`doctorId + date + slot`) preventing duplicate bookings under high concurrency.
 * **Server-Side Verification:** Transaction states verified directly via server-to-server validation routes.
 * **Strict Input Validation:** Runtime request parsing powered by Zod schemas to reject invalid payloads at the router layer.

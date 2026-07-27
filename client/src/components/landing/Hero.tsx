@@ -64,6 +64,7 @@ export const Hero: React.FC<HeroProps> = ({ onBookClick }) => {
         <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white via-white/50 to-transparent z-10" />
         <div className="absolute inset-0 bg-white/40 z-10 lg:hidden" /> 
         <video 
+          poster="/assets/videos/video-poster.jpg"
           autoPlay 
           loop 
           muted 
