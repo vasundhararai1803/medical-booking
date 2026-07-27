@@ -1,4 +1,5 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import { register, login, logoutUser, getMe, requestProfileUpdate, verifyProfileUpdate, sendOtp, verifyOtp } from '../controllers/authController';
 import { z } from 'zod';
 import { validateRequest } from '../middlewares/validateRequest';
@@ -43,6 +44,12 @@ const sendOtpSchema = z.object({
   identifier: z.string().min(3, 'Email or phone number is required'),
 });
 
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 OTP requests per window
+  message: 'Too many OTP requests from this IP, please try again after 15 minutes',
+});
+
 /**
  * @swagger
  * /api/auth/send-otp:
@@ -50,7 +57,7 @@ const sendOtpSchema = z.object({
  *     summary: Send OTP for passwordless login
  *     tags: [Auth]
  */
-router.post('/send-otp', validateRequest(sendOtpSchema), sendOtp);
+router.post('/send-otp', authLimiter, validateRequest(sendOtpSchema), sendOtp);
 
 const verifyOtpSchema = z.object({
   identifier: z.string().min(3, 'Email or phone number is required'),
@@ -64,7 +71,7 @@ const verifyOtpSchema = z.object({
  *     summary: Verify OTP for passwordless login
  *     tags: [Auth]
  */
-router.post('/verify-otp', validateRequest(verifyOtpSchema), verifyOtp);
+router.post('/verify-otp', authLimiter, validateRequest(verifyOtpSchema), verifyOtp);
 
 /**
  * @swagger

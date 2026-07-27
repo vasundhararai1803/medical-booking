@@ -5,6 +5,7 @@ import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Navbar } from '../components/layout/Navbar';
 import { motion } from 'framer-motion';
+import { AxiosError } from 'axios';
 
 export const Consult: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -41,53 +42,33 @@ export const Consult: React.FC = () => {
   const [success, setSuccess] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
-  const FALLBACK_TREATMENTS = [
-    { _id: 't1', title: 'Orthodontics (Braces / Invisalign)' },
-    { _id: 't2', title: 'Dental Implants' },
-    { _id: 't3', title: 'Cosmetic Dentistry & Veneers' },
-    { _id: 't4', title: 'Pediatric Dentistry' },
-    { _id: 't5', title: 'Root Canal Treatment' },
-    { _id: 't6', title: 'Gum Therapy & Periodontics' },
-  ];
-
-  const FALLBACK_DOCTOR = {
-    _id: 'd1_doc',
-    userId: { _id: 'd1', name: 'Jyotirmay Singh' },
-    specializations: ['Orthodontist & Implantologist'],
-    consultationFee: 300
-  };
-
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
         const docRes = await api.get('/doctors');
         let docs = docRes.data?.data?.doctors;
-        if (!docs || docs.length === 0) docs = [FALLBACK_DOCTOR];
         
-        setDoctors(docs);
-        if (docs.length > 0) setSelectedDoctor(docs[0].userId._id);
+        setDoctors(docs || []);
+        if (docs && docs.length > 0) setSelectedDoctor(docs[0].userId._id);
 
         const treatRes = await api.get('/treatments');
         const treats = treatRes.data?.data?.treatments || treatRes.data?.data;
         let treatmentList = Array.isArray(treats) ? treats : (treats?.treatments || []);
         
-        if (!treatmentList || treatmentList.length === 0) treatmentList = FALLBACK_TREATMENTS;
         setTreatments(treatmentList);
         
-        if (!localTreatmentId && treatmentList.length > 0) {
+        if (!initialTreatmentId && treatmentList.length > 0) {
           setLocalTreatmentId(treatmentList[0]._id);
         }
       } catch (err) {
-        // Seamless fallback if backend fails
-        setDoctors([FALLBACK_DOCTOR]);
-        setSelectedDoctor(FALLBACK_DOCTOR.userId._id);
-        
-        setTreatments(FALLBACK_TREATMENTS);
-        if (!localTreatmentId) setLocalTreatmentId(FALLBACK_TREATMENTS[0]._id);
+        const e = err as AxiosError<{ message?: string }>;
+        setError(e.response
+          ? `Server error ${e.response.status}: ${e.response.data?.message ?? 'unknown'}`
+          : 'Network error — could not reach the booking service.');
       }
     };
     if (step === 1) fetchInitialData();
-  }, [step, localTreatmentId]);
+  }, [step, initialTreatmentId]);
 
   useEffect(() => {
     if (!selectedDoctor || !selectedDate || step !== 2) return;

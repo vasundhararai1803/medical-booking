@@ -3,6 +3,7 @@ import { X, CheckCircle, AlertCircle, Video, Building2, Calendar, CreditCard, Ar
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { AxiosError } from 'axios';
 
 interface QuickBookModalProps {
   treatmentId: string | null;
@@ -55,7 +56,10 @@ export const QuickBookModal: React.FC<QuickBookModalProps> = ({ treatmentId, onC
           if (treatmentList.length > 0) setLocalTreatmentId(treatmentList[0]._id);
         }
       } catch (err) {
-        setError('Could not load data');
+        const e = err as AxiosError<{ message?: string }>;
+        setError(e.response
+          ? `Server error ${e.response.status}: ${e.response.data?.message ?? 'unknown'}`
+          : 'Network error — could not reach the booking service.');
       }
     };
     if (step === 1) fetchInitialData();
