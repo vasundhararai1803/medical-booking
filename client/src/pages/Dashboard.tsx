@@ -5,23 +5,7 @@ import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-// Mock Data
-const MOCK_NOTIFICATIONS = [
-  { id: 1, title: 'Appointment Confirmed', desc: 'Tomorrow at 10:00 AM.', unread: true, time: '2h' },
-  { id: 2, title: 'New Prescription', desc: 'Dr. Thorne uploaded your prescription.', unread: true, time: '5h' },
-  { id: 3, title: 'Invoice Paid', desc: 'Payment of ₹150 received.', unread: false, time: '1d' },
-];
-
-const MOCK_RECORDS = [
-  { id: 1, type: 'X-Ray (Panoramic)', date: 'May 12, 2026' },
-  { id: 2, type: 'Treatment Plan', date: 'April 04, 2026' },
-  { id: 3, type: 'Prescription', date: 'April 04, 2026' },
-];
-
-const MOCK_PAYMENTS = [
-  { id: 1, desc: 'Root Canal Treatment', date: 'May 10', amount: '₹850', status: 'Paid' },
-  { id: 2, desc: 'General Consultation', date: 'June 15', amount: '₹150', status: 'Pending' },
-];
+// Mock Data removed
 
 export const PatientDashboardView: React.FC = () => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -207,20 +191,25 @@ export const PatientDashboardView: React.FC = () => {
                 </button>
               </div>
               <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.02)] overflow-hidden">
-                {MOCK_RECORDS.map((record, index) => (
-                  <div key={record.id} className={`flex items-center justify-between p-4 ${index !== MOCK_RECORDS.length - 1 ? 'border-b border-slate-100' : ''}`}>
-                    <div className="flex items-center gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-slate-900">{record.type}</p>
-                        <p className="text-xs text-slate-500">{record.date}</p>
+                {appointments.filter(a => a.medicalReportUrl).length === 0 ? (
+                  <div className="p-8 text-center text-slate-500 text-sm">
+                    No digital records available.
+                  </div>
+                ) : (
+                  appointments.filter(a => a.medicalReportUrl).map((record, index, arr) => (
+                    <div key={record._id} className={`flex items-center justify-between p-4 ${index !== arr.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <p className="text-sm font-medium text-slate-900">Medical Report: {record.treatmentId?.title || 'Consultation'}</p>
+                          <p className="text-xs text-slate-500">{new Date(record.appointmentDate).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm font-medium">
+                        <a href={record.medicalReportUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 transition-colors">View</a>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 text-sm font-medium">
-                      <button onClick={() => alert(`Opening ${record.type} record...`)} className="text-slate-500 hover:text-slate-800 transition-colors">View</button>
-                      <button onClick={() => alert(`Downloading ${record.type} record...`)} className="text-blue-600 hover:text-blue-700 transition-colors">Download</button>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </motion.div>
 
@@ -228,21 +217,26 @@ export const PatientDashboardView: React.FC = () => {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
               <h2 className="text-lg font-semibold mb-4 tracking-tight">Payments</h2>
               <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.02)] overflow-hidden">
-                {MOCK_PAYMENTS.map((payment, index) => (
-                  <div key={payment.id} className={`flex items-center justify-between p-4 ${index !== MOCK_PAYMENTS.length - 1 ? 'border-b border-slate-100' : ''}`}>
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">{payment.desc}</p>
-                      <p className="text-xs text-slate-500">{payment.date}</p>
-                    </div>
-                    <div className="flex items-center gap-6">
-                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${payment.status === 'Paid' ? 'bg-slate-100 text-slate-600' : 'bg-amber-50 text-amber-700'}`}>
-                        {payment.status}
-                      </span>
-                      <p className="text-sm font-medium text-slate-900 w-12 text-right">{payment.amount}</p>
-                      <button onClick={() => alert('Downloading invoice...')} className="text-sm text-blue-600 hover:text-blue-700 font-medium">Invoice</button>
-                    </div>
+                {appointments.length === 0 ? (
+                  <div className="p-8 text-center text-slate-500 text-sm">
+                    No payments found.
                   </div>
-                ))}
+                ) : (
+                  appointments.map((payment, index, arr) => (
+                    <div key={payment._id} className={`flex items-center justify-between p-4 ${index !== arr.length - 1 ? 'border-b border-slate-100' : ''}`}>
+                      <div>
+                        <p className="text-sm font-medium text-slate-900">{payment.treatmentId?.title || 'General Consultation'}</p>
+                        <p className="text-xs text-slate-500">{new Date(payment.appointmentDate).toLocaleDateString()}</p>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <span className={`text-xs font-medium px-2.5 py-1 rounded-full capitalize ${payment.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+                          {payment.paymentStatus || 'pending'}
+                        </span>
+                        <p className="text-sm font-medium text-slate-900 w-12 text-right">₹500</p>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </motion.div>
 
@@ -293,27 +287,28 @@ export const PatientDashboardView: React.FC = () => {
               <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.02)] p-6">
                 <h3 className="text-base font-semibold text-slate-900 mb-6">Notifications</h3>
                 <div className="space-y-5">
-                  {MOCK_NOTIFICATIONS.map(note => (
-                    <div key={note.id} className="flex gap-3">
+                  {appointments.slice(0, 3).map((appt) => (
+                    <div key={appt._id} className="flex gap-3">
                       <div className="mt-1.5">
-                        <div className={`w-2 h-2 rounded-full ${note.unread ? 'bg-blue-500' : 'bg-slate-200'}`} />
+                        <div className={`w-2 h-2 rounded-full ${appt.status === 'confirmed' ? 'bg-blue-500' : 'bg-slate-200'}`} />
                       </div>
                       <div>
                         <div className="flex items-center justify-between gap-4">
-                          <p className={`text-sm ${note.unread ? 'font-medium text-slate-900' : 'text-slate-600'}`}>{note.title}</p>
-                          <span className="text-[10px] text-slate-400 whitespace-nowrap">{note.time}</span>
+                          <p className={`text-sm ${appt.status === 'confirmed' ? 'font-medium text-slate-900' : 'text-slate-600'}`}>
+                            Appointment {appt.status}
+                          </p>
+                          <span className="text-[10px] text-slate-400 whitespace-nowrap">{new Date(appt.createdAt).toLocaleDateString()}</span>
                         </div>
-                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">{note.desc}</p>
+                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                          Your {appt.treatmentId?.title || 'appointment'} is scheduled for {new Date(appt.appointmentDate).toLocaleDateString()} at {appt.timeSlot}.
+                        </p>
                       </div>
                     </div>
                   ))}
+                  {appointments.length === 0 && (
+                    <p className="text-sm text-slate-500 text-center py-4">No recent notifications</p>
+                  )}
                 </div>
-                <button 
-                  onClick={() => alert('Opening notifications center...')}
-                  className="w-full mt-6 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
-                >
-                  View All Notifications
-                </button>
               </div>
             </motion.div>
 
