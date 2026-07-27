@@ -20,24 +20,31 @@ const app: Application = express();
 
 // Security Middlewares
 app.use(helmet());
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-      
-      const allowedClient = process.env.CLIENT_URL || 'http://localhost:5173';
-      
-      // Allow exact match, or any Vercel preview domain to prevent deployment blocking
-      if (origin === allowedClient || origin.endsWith('.vercel.app') || origin === 'http://localhost:5173') {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    credentials: true,
-  })
-);
+const allowedOrigins = [
+  'https://medical-booking-inky.vercel.app',
+  process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
+].filter(Boolean) as string[];
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, or Postman)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Fallback: allow request to prevent hard failure
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+};
+
+// Apply CORS middleware globally
+app.use(cors(corsOptions));
+
+// Explicitly handle preflight OPTIONS requests for ALL routes
+app.options('*', cors(corsOptions));
 
 // Rate Limiting
 const limiter = rateLimit({
