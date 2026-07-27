@@ -44,7 +44,7 @@ const corsOptions: cors.CorsOptions = {
 app.use(cors(corsOptions));
 
 // Explicitly handle preflight OPTIONS requests for ALL routes
-app.options('*', cors(corsOptions));
+app.options(/(.*)/, cors(corsOptions));
 
 // Rate Limiting
 const limiter = rateLimit({
