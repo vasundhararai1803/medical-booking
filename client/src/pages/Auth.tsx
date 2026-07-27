@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Shield, AlertCircle, Mail, ArrowRight, User, Lock } from 'lucide-react';
+import { Shield, AlertCircle, Mail, ArrowRight, User, Lock, Eye, EyeOff } from 'lucide-react';
+import { AxiosError } from 'axios';
 import { motion } from 'framer-motion';
 
 export const Auth: React.FC = () => {
@@ -15,6 +16,7 @@ export const Auth: React.FC = () => {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const from = (location.state as any)?.from?.pathname || '/';
 
@@ -36,8 +38,12 @@ export const Auth: React.FC = () => {
         await login(identifier, password);
       }
       navigate(from, { replace: true });
-    } catch (err: any) {
-      setError(err.response?.data?.message || (mode === 'signup' ? 'Registration failed' : 'Invalid credentials'));
+    } catch (err) {
+      const e = err as AxiosError<{ message?: string }>;
+      setError(
+        e.response?.data?.message || 
+        (e.response ? `Server error ${e.response.status}` : 'Network error — could not reach the server.')
+      );
     } finally {
       setLoading(false);
     }
@@ -183,15 +189,26 @@ export const Auth: React.FC = () => {
                 </div>
                 <input
                   id="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   name="password"
                   autoComplete={mode === 'signin' ? "current-password" : "new-password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full pl-11 pr-3 py-3.5 border border-slate-200 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 sm:text-base font-medium transition-all"
+                  className="appearance-none block w-full pl-11 pr-10 py-3.5 border border-slate-200 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 sm:text-base font-medium transition-all"
                   placeholder="Enter your password"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" aria-hidden="true" />
+                  ) : (
+                    <Eye className="h-5 w-5" aria-hidden="true" />
+                  )}
+                </button>
               </div>
             </div>
 
