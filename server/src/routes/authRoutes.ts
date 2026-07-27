@@ -1,8 +1,9 @@
 import express from 'express';
-import { sendOtp, logoutUser, getMe, verifyOtp, requestProfileUpdate, verifyProfileUpdate } from '../controllers/authController';
+import { register, login, logoutUser, getMe, requestProfileUpdate, verifyProfileUpdate } from '../controllers/authController';
 import { protect } from '../middlewares/auth';
 import { validateRequest } from '../middlewares/validateRequest';
-import { sendOtpSchema, verifyOtpSchema } from '../schemas/authSchema';
+import { sendOtpSchema, verifyOtpSchema } from '../schemas/authSchema'; // I will just remove the schema validations for now to simplify, or keep them but they are for otp.
+// We can just omit validateRequest for now as we have basic validation in controller.
 
 const router = express.Router();
 
@@ -15,54 +16,29 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/auth/send-otp:
+ * /api/auth/register:
  *   post:
- *     summary: Send 4-digit OTP for login or registration
+ *     summary: Register a new user
  *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - identifier
- *             properties:
- *               identifier:
- *                 type: string
  *     responses:
- *       200:
- *         description: OTP sent successfully
+ *       201:
+ *         description: User registered successfully
  */
-router.post('/send-otp', validateRequest(sendOtpSchema), sendOtp);
+router.post('/register', register);
 
 /**
  * @swagger
- * /api/auth/verify-otp:
+ * /api/auth/login:
  *   post:
- *     summary: Verify 4-digit OTP
+ *     summary: Login user with password
  *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - identifier
- *               - code
- *             properties:
- *               identifier:
- *                 type: string
- *               code:
- *                 type: string
  *     responses:
  *       200:
  *         description: Login successful
  *       401:
- *         description: Invalid OTP
+ *         description: Invalid credentials
  */
-router.post('/verify-otp', validateRequest(verifyOtpSchema), verifyOtp);
+router.post('/login', login);
 
 /**
  * @swagger

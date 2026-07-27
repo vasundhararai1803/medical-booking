@@ -36,119 +36,61 @@ const sendTokenResponse = (user: any, statusCode: number, res: Response) => {
   });
 };
 
-export const sendOtp = async (
+export const register = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { identifier, name } = req.body;
+    const { name, email, phone, password, role } = req.body;
 
-    if (!identifier) {
-      return next(new AppError('Please provide an email or phone number', 400));
+    if (!email || !password || !name) {
+      return next(new AppError('Name, email, and password are required', 400));
     }
 
-    let user = await User.findOne({
-      $or: [{ email: identifier.toLowerCase() }, { phone: identifier }]
+    let userExists = await User.findOne({ email: email.toLowerCase() });
+
+    if (userExists) {
+      return next(new AppError('User already exists', 400));
+    }
+
+    const user = await User.create({
+      name,
+      email: email.toLowerCase(),
+      password,
+      phone,
+      role: role || 'patient',
     });
 
-    if (!user) {
-      // Auto-create user if it doesn't exist
-      const isEmail = identifier.includes('@');
-      user = await User.create({
-        name: name || (isEmail ? identifier.split('@')[0] : 'New Patient'),
-        email: isEmail ? identifier.toLowerCase() : `${identifier}@placeholder.com`,
-        phone: isEmail ? undefined : identifier,
-        role: 'patient',
-      });
-    }
-
-    // Generate 4-digit OTP
-    const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
-    console.log(`🔑 DEV OTP CODE: ${otpCode}`);
-
-    // Delete existing OTPs for this identifier
-    await Otp.deleteMany({ identifier });
-
-    await Otp.create({
-      identifier,
-      otpHash: otpCode, 
-      deliveryType: 'email',
-    });
-
-    if (user.email && !user.email.endsWith('@placeholder.com')) {
-      await sendEmail({
-        to: user.email,
-        subject: 'Your Facio Dental Verification Code',
-        text: `Your one-time verification code is: ${otpCode}. It will expire in 5 minutes.`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;">
-            <h2 style="color: #0f172a; margin-bottom: 20px;">Verification Required</h2>
-            <p style="color: #475569; font-size: 16px;">Hello ${user.name},</p>
-            <p style="color: #475569; font-size: 16px;">Please use the following 4-digit code to securely sign in. This code will expire in 5 minutes.</p>
-            <div style="background-color: #f1f5f9; padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0;">
-              <span style="font-size: 28px; font-weight: bold; color: #0284c7; letter-spacing: 8px;">${otpCode}</span>
-            </div>
-          </div>
-        `,
-      });
-    }
-
-    // Mock SMS Dispatch if phone exists
-    if (user.phone || !identifier.includes('@')) {
-      try {
-        const targetPhone = formatPhone(user.phone || identifier);
-        console.log(`\n\n========== SIMULATED SMS ==========`);
-        console.log(`To: ${targetPhone}`);
-        console.log(`Message: Your Facio Dental code is ${otpCode}. Valid for 5 mins.`);
-        console.log(`===================================\n\n`);
-      } catch (smsError) {
-        console.error('SMS Gateway Error:', smsError);
-      }
-    }
-
-    res.status(200).json({
-      success: true,
-      message: '4-digit OTP sent successfully',
-    });
+    sendTokenResponse(user, 201, res);
   } catch (error) {
     next(error);
   }
 };
 
-export const verifyOtp = async (
+export const login = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { identifier, code } = req.body;
+    const { identifier, password } = req.body;
 
-    if (!identifier || !code) {
-      return next(new AppError('Identifier and code are required', 400));
+    if (!identifier || !password) {
+      return next(new AppError('Email/phone and password are required', 400));
     }
-
-    // Find latest OTP record
-    const otpRecord = await Otp.findOne({ identifier }).sort({ createdAt: -1 });
-
-    if (!otpRecord) {
-      return next(new AppError('OTP expired or invalid', 400));
-    }
-
-    const isMatch = (code === '1234') || await otpRecord.matchOtp(code);
-
-    if (!isMatch) {
-      return next(new AppError('Incorrect OTP', 401));
-    }
-
-    await Otp.deleteOne({ _id: otpRecord._id });
 
     const user = await User.findOne({
       $or: [{ email: identifier.toLowerCase() }, { phone: identifier }]
-    });
+    }).select('+password');
 
     if (!user) {
-      return next(new AppError('User not found', 404));
+      return next(new AppError('Invalid credentials', 401));
+    }
+
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      return next(new AppError('Invalid credentials', 401));
     }
 
     sendTokenResponse(user, 200, res);
