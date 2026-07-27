@@ -140,7 +140,7 @@ const seedDatabase = async () => {
       { title: 'Emergency Tooth Pain Relief', category: 'emergency', isActive: true, imageUrl: 'https://images.unsplash.com/photo-1584516150909-c43483ee7932?auto=format&fit=crop&q=80&w=800' }
     ];
     
-    const treatments = await Treatment.insertMany(
+    await Treatment.insertMany(
       rawTreatments.map(t => ({
         ...t,
         slug: t.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')

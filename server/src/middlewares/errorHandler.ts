@@ -1,8 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { AppError } from '../utils/AppError';
+interface CustomError extends Error {
+  statusCode?: number;
+  status?: string;
+  isOperational?: boolean;
+}
 
 export const errorHandler = (
-  err: any,
+  err: CustomError,
   req: Request,
   res: Response,
   next: NextFunction

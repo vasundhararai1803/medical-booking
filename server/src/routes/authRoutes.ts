@@ -1,9 +1,6 @@
 import express from 'express';
 import { register, login, logoutUser, getMe, requestProfileUpdate, verifyProfileUpdate } from '../controllers/authController';
 import { protect } from '../middlewares/auth';
-import { validateRequest } from '../middlewares/validateRequest';
-import { sendOtpSchema, verifyOtpSchema } from '../schemas/authSchema'; // I will just remove the schema validations for now to simplify, or keep them but they are for otp.
-// We can just omit validateRequest for now as we have basic validation in controller.
 
 const router = express.Router();
 

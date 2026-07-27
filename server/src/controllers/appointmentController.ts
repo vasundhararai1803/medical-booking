@@ -57,8 +57,8 @@ export const createAppointment = async (
         medicalReportUrl,
         videoConsultUrl,
       });
-    } catch (err: any) {
-      if (err.code === 11000) {
+    } catch (err: unknown) {
+      if ((err as { code?: number }).code === 11000) {
         return next(new AppError('This time slot was just booked by another patient. Please select another slot.', 409));
       }
       throw err;
@@ -70,9 +70,9 @@ export const createAppointment = async (
       .populate('treatmentId', 'title');
 
     if (populatedAppointment) {
-      const patient: any = populatedAppointment.patientId;
-      const doctor: any = populatedAppointment.doctorId;
-      const treatment: any = populatedAppointment.treatmentId;
+      const patient = populatedAppointment.patientId as unknown as { email?: string; name?: string; phoneNumber?: string; };
+      const doctor = populatedAppointment.doctorId as unknown as { userId?: { name?: string; email?: string } };
+      const treatment = populatedAppointment.treatmentId as unknown as { title?: string };
 
       // Email to Patient
       if (patient?.email) {
@@ -174,7 +174,7 @@ export const getDoctorSchedule = async (
       return next(new AppError('Doctor profile not found', 404));
     }
 
-    const query: any = { doctorId: doctor._id };
+    const query: Record<string, unknown> = { doctorId: doctor._id };
 
     if (startDate && endDate) {
       query.appointmentDate = {
@@ -225,7 +225,7 @@ export const cancelAppointment = async (
     }
 
     // Check ownership or admin rights
-    const isPatient = appointment.patientId.toString() === (req.user as any)?._id?.toString();
+    const isPatient = appointment.patientId.toString() === (req.user as unknown as { _id?: { toString(): string } })?._id?.toString();
     const isAdmin = req.user?.role === 'admin';
     // For doctor, check if the doctorId belongs to them
     let isDoctorOwner = false;
@@ -287,9 +287,9 @@ export const updateAppointmentStatus = async (
     await appointment.save();
 
     if (status === 'confirmed' || status === 'cancelled') {
-      const patient: any = appointment.patientId;
-      const treatment: any = appointment.treatmentId;
-      const doctor: any = appointment.doctorId;
+      const patient = appointment.patientId as unknown as { email?: string; name?: string };
+      const treatment = appointment.treatmentId as unknown as { title?: string };
+      const doctor = appointment.doctorId as unknown as { userId?: { name?: string } };
 
       if (patient?.email) {
         const statusText = status === 'confirmed' ? 'has been Confirmed' : 'was Cancelled';
@@ -341,7 +341,7 @@ export const getBookedSlots = async (
         $lte: endOfDay,
       },
       status: { $ne: 'cancelled' },
-    } as any).select('timeSlot -_id');
+    } as Record<string, unknown>).select('timeSlot -_id');
 
     const bookedSlots = bookedAppointments.map((app) => app.timeSlot);
 

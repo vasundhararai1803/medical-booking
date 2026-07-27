@@ -29,7 +29,7 @@ const server = app.listen(PORT, () => {
 });
 
 // Handle unhandled rejections
-process.on('unhandledRejection', (err: any) => {
+process.on('unhandledRejection', (err: Error) => {
   console.error('UNHANDLED REJECTION! 💥 Shutting down...');
   console.error(err.name, err.message);
   server.close(() => {

@@ -5,7 +5,7 @@ export interface IOtp extends Document {
   identifier: string;
   otpHash: string;
   deliveryType: 'email' | 'phone';
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   matchOtp(enteredOtp: string): Promise<boolean>;
 }

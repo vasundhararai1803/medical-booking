@@ -10,7 +10,7 @@ export const getTreatments = async (
   try {
     const { category } = req.query;
 
-    const query: any = { isActive: true };
+    const query: Record<string, unknown> = { isActive: true };
 
     if (category) {
       query.category = category as string;

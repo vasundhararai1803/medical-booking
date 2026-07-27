@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import mongoose from 'mongoose';
-import { User } from '../models/User';
+import { User, IUser } from '../models/User';
 import { AppError } from '../utils/AppError';
 import { env } from '../config/env';
 import { sendEmail } from '../utils/sendEmail';
@@ -14,7 +13,7 @@ const generateToken = (id: string, role: string) => {
   });
 };
 
-const sendTokenResponse = (user: any, statusCode: number, res: Response) => {
+const sendTokenResponse = (user: IUser, statusCode: number, res: Response) => {
   const token = generateToken((user._id as string).toString(), user.role);
 
   res.cookie('token', token, {
@@ -48,7 +47,7 @@ export const register = async (
       return next(new AppError('Name, email, and password are required', 400));
     }
 
-    let userExists = await User.findOne({ email: email.toLowerCase() });
+    const userExists = await User.findOne({ email: email.toLowerCase() });
 
     if (userExists) {
       return next(new AppError('User already exists', 400));
@@ -189,7 +188,7 @@ export const verifyProfileUpdate = async (
       user,
     });
   } catch (error) {
-    if ((error as any).code === 11000) {
+    if ((error as { code?: number }).code === 11000) {
       return next(new AppError('Email or phone already in use', 409));
     }
     next(error);

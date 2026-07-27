@@ -1,7 +1,6 @@
 import request from 'supertest';
 import { describe, it, expect, beforeEach } from 'vitest';
 import app from '../app';
-import mongoose from 'mongoose';
 import { User } from '../models/User';
 import { Doctor } from '../models/Doctor';
 import { Appointment } from '../models/Appointment';
@@ -40,7 +39,7 @@ describe.skip('Appointment Routes', () => {
       experience: '5 years',
       consultationFee: 500,
     });
-    doctorId = (doc as any)._id.toString();
+    doctorId = doc._id.toString();
   });
 
   describe('POST /api/appointments', () => {
@@ -89,7 +88,7 @@ describe.skip('Appointment Routes', () => {
         });
 
       // Try to create the same appointment slot
-      const conflictResponse = await request(app)
+      await request(app)
         .post('/api/appointments')
         .set('Cookie', patientCookie)
         .send({
