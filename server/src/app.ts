@@ -22,6 +22,7 @@ const app: Application = express();
 app.use(helmet());
 const allowedOrigins = [
   'https://medical-booking-inky.vercel.app',
+  'https://medical-booking-reachvasundhararai-3263s-projects.vercel.app',
   process.env.CLIENT_URL,
   process.env.FRONTEND_URL,
 ].filter(Boolean) as string[];
