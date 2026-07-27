@@ -1,5 +1,7 @@
 import express from 'express';
-import { register, login, logoutUser, getMe, requestProfileUpdate, verifyProfileUpdate } from '../controllers/authController';
+import { register, login, logoutUser, getMe, requestProfileUpdate, verifyProfileUpdate, sendOtp, verifyOtp } from '../controllers/authController';
+import { z } from 'zod';
+import { validateRequest } from '../middlewares/validateRequest';
 import { protect } from '../middlewares/auth';
 
 const router = express.Router();
@@ -36,6 +38,33 @@ router.post('/register', register);
  *         description: Invalid credentials
  */
 router.post('/login', login);
+
+const sendOtpSchema = z.object({
+  identifier: z.string().min(3, 'Email or phone number is required'),
+});
+
+/**
+ * @swagger
+ * /api/auth/send-otp:
+ *   post:
+ *     summary: Send OTP for passwordless login
+ *     tags: [Auth]
+ */
+router.post('/send-otp', validateRequest(sendOtpSchema), sendOtp);
+
+const verifyOtpSchema = z.object({
+  identifier: z.string().min(3, 'Email or phone number is required'),
+  otp: z.string().length(4, 'OTP must be exactly 4 digits'),
+});
+
+/**
+ * @swagger
+ * /api/auth/verify-otp:
+ *   post:
+ *     summary: Verify OTP for passwordless login
+ *     tags: [Auth]
+ */
+router.post('/verify-otp', validateRequest(verifyOtpSchema), verifyOtp);
 
 /**
  * @swagger

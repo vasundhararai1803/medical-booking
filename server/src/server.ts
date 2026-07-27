@@ -24,17 +24,24 @@ mongoose
     process.exit(1);
   });
 
-const server = app.listen(PORT, () => {
-  console.log(`🚀 AuraSmile Server is running on port ${PORT}`);
-});
+let server: any;
+if (require.main === module) {
+  server = app.listen(PORT, () => {
+    console.log(`🚀 AuraSmile Server is running on port ${PORT}`);
+  });
+}
 
 // Handle unhandled rejections
 process.on('unhandledRejection', (err: Error) => {
   console.error('UNHANDLED REJECTION! 💥 Shutting down...');
   console.error(err.name, err.message);
-  server.close(() => {
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  } else {
     process.exit(1);
-  });
+  }
 });
 
 export default app;

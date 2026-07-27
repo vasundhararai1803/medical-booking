@@ -6,8 +6,7 @@ const requiredEnvVars = ['JWT_SECRET', 'MONGO_URI'];
 
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
-    console.error(`[FATAL] Missing required environment variable: ${envVar}`);
-    process.exit(1);
+    throw new Error(`[FATAL] Missing required environment variable: ${envVar}`);
   }
 }
 

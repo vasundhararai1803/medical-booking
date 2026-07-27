@@ -79,7 +79,7 @@ const appointmentSchema: Schema<IAppointment> = new Schema(
 
 appointmentSchema.index(
   { doctorId: 1, appointmentDate: 1, timeSlot: 1 },
-  { unique: true }
+  { unique: true, partialFilterExpression: { status: { $ne: 'cancelled' } } }
 );
 
 export const Appointment: Model<IAppointment> = mongoose.models.Appointment || mongoose.model<IAppointment>('Appointment', appointmentSchema);

@@ -17,6 +17,7 @@ import { swaggerSpec } from './config/swagger';
 dotenv.config();
 
 const app: Application = express();
+app.set('trust proxy', 1); // Trust Vercel's reverse proxy for accurate IP reading
 
 // Security Middlewares
 app.use(helmet());
@@ -33,7 +34,7 @@ const corsOptions: cors.CorsOptions = {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(null, true); // Fallback: allow request to prevent hard failure
+      callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,

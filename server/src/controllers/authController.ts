@@ -98,6 +98,78 @@ export const login = async (
   }
 };
 
+export const sendOtp = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { identifier } = req.body;
+    
+    // Check if user exists (for login) or we could just send OTP anyway
+    let user = await User.findOne({
+      $or: [{ email: identifier.toLowerCase() }, { phone: identifier }]
+    });
+
+    if (!user) {
+      // Optional: auto-create user for seamless passwordless login, or return error
+      return next(new AppError('User not found. Please register first.', 404));
+    }
+
+    const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
+    console.log(`🔑 DEV OTP CODE (Login): ${otpCode}`);
+
+    await Otp.deleteMany({ identifier });
+    await Otp.create({
+      identifier,
+      otpHash: otpCode,
+    });
+
+    // Simulate sending email/SMS
+    console.log(`\n\n========== SIMULATED LOGIN OTP ==========`);
+    console.log(`To: ${identifier}`);
+    console.log(`Code: ${otpCode}`);
+    console.log(`===========================================\n\n`);
+
+    res.status(200).json({
+      success: true,
+      message: 'OTP sent successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyOtp = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { identifier, otp } = req.body;
+
+    const otpRecord = await Otp.findOne({ identifier }).sort({ createdAt: -1 });
+    if (!otpRecord) return next(new AppError('OTP expired or invalid', 400));
+
+    const isMatch = await otpRecord.matchOtp(otp);
+    if (!isMatch) return next(new AppError('Incorrect OTP', 401));
+
+    const user = await User.findOne({
+      $or: [{ email: identifier.toLowerCase() }, { phone: identifier }]
+    });
+
+    if (!user) {
+       return next(new AppError('User not found', 404));
+    }
+
+    await Otp.deleteOne({ _id: otpRecord._id });
+    
+    sendTokenResponse(user, 200, res);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const requestProfileUpdate = async (
   req: Request,
   res: Response,
@@ -165,11 +237,11 @@ export const verifyProfileUpdate = async (
     const { otp } = req.body;
     if (!otp) return next(new AppError('OTP is required', 400));
 
-    // Get the latest OTP record where metadata exists for this user
-    const otpRecord = await Otp.findOne({ 'metadata.email': { $exists: true } }).sort({ createdAt: -1 });
+    const identifier = user.email || user.phone;
+    const otpRecord = await Otp.findOne({ identifier, 'metadata.email': { $exists: true } }).sort({ createdAt: -1 });
     if (!otpRecord) return next(new AppError('OTP expired or invalid', 400));
 
-    const isMatch = (otp === '1234') || await otpRecord.matchOtp(otp);
+    const isMatch = await otpRecord.matchOtp(otp);
     if (!isMatch) return next(new AppError('Incorrect OTP', 401));
 
     if (otpRecord.metadata) {
@@ -211,7 +283,11 @@ export const logoutUser = (
   res: Response,
   next: NextFunction
 ): void => {
-  res.clearCookie('token');
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: env.NODE_ENV === 'production',
+    sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax'
+  });
 
   res.status(200).json({
     success: true,
