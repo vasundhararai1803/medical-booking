@@ -14,7 +14,7 @@ const generateToken = (id: string, role: string) => {
 };
 
 const sendTokenResponse = (user: IUser, statusCode: number, res: Response) => {
-  const token = generateToken((user._id as string).toString(), user.role);
+  const token = generateToken(String(user._id), user.role);
 
   res.cookie('token', token, {
     httpOnly: true,
@@ -173,7 +173,7 @@ export const verifyProfileUpdate = async (
     if (!isMatch) return next(new AppError('Incorrect OTP', 401));
 
     if (otpRecord.metadata) {
-      const { name, email, phone } = otpRecord.metadata;
+      const { name, email, phone } = otpRecord.metadata as { name?: string; email?: string; phone?: string };
       if (name) user.name = name;
       if (email) user.email = email;
       if (phone) user.phone = phone;
